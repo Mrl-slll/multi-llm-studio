@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Multi-LLM Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-card: #020617;
+      --bg-elevated: #020617;
+      --border-subtle: #1e293b;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.16);
+      --accent-blue: #38bdf8;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --danger: #f97373;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow-soft: 0 24px 80px rgba(15, 23, 42, 0.9);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+      --transition-fast: 160ms ease-out;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-sans);
+      background:
+        radial-gradient(circle at 0% -20%, #4f46e5 0, #020617 40%, #000000 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1120px;
+      padding: 24px 14px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      main {
+        padding: 28px 22px 46px;
+      }
+    }
+
+    .shell {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.28), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.2), transparent 60%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .orb {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background:
+        conic-gradient(from 210deg, #22c55e, #38bdf8, #a855f7, #22c55e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #020617;
+      font-weight: 800;
+      font-size: 0.9rem;
+      box-shadow:
+        0 0 0 2px #020617,
+        0 0 32px rgba(59, 130, 246, 0.9);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .brand-text span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      background: rgba(15, 23, 42, 0.98);
+      color: #e5e7eb;
+    }
+
+    .pill-primary {
+      border-color: rgba(34, 197, 94, 0.85);
+      background: radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.2), rgba(15, 23, 42, 0.98));
+      color: #bbf7d0;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.95);
+    }
+
+    .prompt-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #6b7280;
+    }
+
+    .kbd {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      padding: 1px 5px;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      padding: 10px 12px;
+      border-radius: var(--radius-lg);
+      font-size: 0.94rem;
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.99), rgba(15, 23, 42, 0.96));
+      border: 1px solid rgba(51, 65, 85, 0.95);
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 1);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
+                  transform var(--transition-fast), background var(--transition-fast);
+    }
+
+    textarea::placeholder {
+      color: #6b7280;
+    }
+
+    textarea:focus {
+      border-color: rgba(59, 130, 246, 0.95);
+      box-shadow:
+        0 0 0 1px rgba(37, 99, 235, 0.9),
+        0 18px 44px rgba(15, 23, 42, 1);
+      transform: translateY(-0.5px);
+    }
+
+    .controls-row {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 3px;
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      background: rgba(15, 23, 42, 0.98);
+      box-shadow: 0 13px 36px rgba(15, 23, 42, 1);
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      color: #9ca3af;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--transition-fast), color var(--transition-fast),
+                  transform var(--transition-fast);
+    }
+
+    .mode-btn span.icon {
+      font-size: 0.82rem;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(to right, rgba(59, 130, 246, 0.24), rgba(34, 197, 94, 0.24));
+      color: #e5e7eb;
+      transform: translateY(-0.5px);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    button {
+      font-family: var(--font-sans);
+    }
+
+    .btn-primary {
+      border: none;
+      border-radius: 999px;
+      padding: 7px 18px;
+      font-size: 0.86rem;
+      font-weight: 560;
+      letter-spacing: 0.02em;
+      background: linear-gradient(120deg, #22c55e, #4ade80);
+      color: #022c22;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow:
+        0 0 0 1px rgba(22, 163, 74, 0.9),
+        0 20px 52px rgba(16, 185, 129, 0.95);
+      transition: transform 140ms ease-out, box-shadow 140ms ease-out,
+                  filter 140ms ease-out;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow:
+        0 0 0 1px rgba(22, 163, 74, 1),
+        0 24px 64px rgba(22, 163, 74, 1);
+      filter: saturate(1.06);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: default;
+      transform: none;
+      box-shadow:
+        0 0 0 1px rgba(22, 163, 74, 0.6),
+        0 10px 26px rgba(16, 185, 129, 0.6);
+    }
+
+    .btn-secondary {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.98);
+      color: #e5e7eb;
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--transition-fast), border-color var(--transition-fast),
+                  transform var(--transition-fast);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(15, 23, 42, 1);
+      border-color: rgba(148, 163, 184, 1);
+      transform: translateY(-0.5px);
+    }
+
+    .layout-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 900px) {
+      .layout-main {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.1fr);
+      }
+    }
+
+    .responses-card {
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 16px;
+      border: 1px solid rgba(51, 65, 85, 0.95);
+      padding: 11px 11px 9px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.95);
+    }
+
+    .resp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .resp-title {
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.85);
+      background: rgba(15, 23, 42, 1);
+      color: #cbd5e1;
+    }
+
+    .resp-hint {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .columns.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 720px) {
+      .columns.two {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(51, 65, 85, 0.95);
+      background: radial-gradient(circle at top left, #020617, #020617 40%, #000000 100%);
+      padding: 7px 8px 8px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .model-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(71, 85, 105, 0.98);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .model-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      box-shadow: 0 0 9px currentColor;
+    }
+
+    .panel-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .status-pill {
+      font-size: 0.72rem;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 1);
+      background: rgba(15, 23, 42, 1);
+      color: #9ca3af;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 7px rgba(34, 197, 94, 0.9);
+    }
+
+    .status-pill.active {
+      border-color: rgba(34, 197, 94, 0.9);
+      color: #bbf7d0;
+      background: rgba(22, 163, 74, 0.1);
+    }
+
+    .status-pill.error {
+      border-color: rgba(248, 113, 113, 0.95);
+      background: rgba(127, 29, 29, 0.9);
+      color: #fecaca;
+    }
+
+    .status-dot.pulse {
+      animation: pulse 1s infinite alternate;
+    }
+
+    .status-dot.error {
+      background: #f97373;
+      box-shadow: 0 0 8px rgba(248, 113, 113, 1);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      100% { transform: scale(1.15); opacity: 1; }
+    }
+
+    .panel-body {
+      font-size: 0.86rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 3px;
+      word-break: break-word;
+    }
+
+    /* Markdown styling */
+    .panel-body h1, .panel-body h2, .panel-body h3,
+    .panel-body h4, .panel-body h5, .panel-body h6 {
+      margin-top: 1em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .panel-body h1 { font-size: 1.4rem; }
+    .panel-body h2 { font-size: 1.2rem; }
+    .panel-body h3 { font-size: 1.05rem; }
+
+    .panel-body p {
+      margin: 0.75em 0;
+    }
+
+    .panel-body ul, .panel-body ol {
+      margin: 0.5em 0;
+      padding-left: 1.5em;
+    }
+
+    .panel-body li {
+      margin: 0.25em 0;
+    }
+
+    .panel-body code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+      color: #fbbf24;
+    }
+
+    .panel-body pre {
+      margin: 0.75em 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      overflow-x: auto;
+    }
+
+    .panel-body pre code {
+      padding: 0;
+      background: none;
+      border: none;
+      color: #e2e8f0;
+    }
+
+    .panel-body blockquote {
+      margin: 0.75em 0;
+      padding-left: 1em;
+      border-left: 3px solid rgba(34, 197, 94, 0.6);
+      color: #cbd5e1;
+      font-style: italic;
+    }
+
+    .panel-body a {
+      color: #38bdf8;
+      text-decoration: underline;
+    }
+
+    .panel-body a:hover {
+      color: #7dd3fc;
+    }
+
+    .panel-body strong {
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .panel-body em {
+      font-style: italic;
+    }
+
+    .panel-body hr {
+      margin: 1em 0;
+      border: none;
+      border-top: 1px solid rgba(51, 65, 85, 0.8);
+    }
+
+    .panel-body table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.75em 0;
+    }
+
+    .panel-body th, .panel-body td {
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      padding: 6px 10px;
+      text-align: left;
+    }
+
+    .panel-body th {
+      background: rgba(0, 0, 0, 0.4);
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .panel-body::-webkit-scrollbar { width: 6px; }
+    .panel-body::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 1);
+      border-radius: 999px;
+    }
+
+    .placeholder {
+      font-size: 0.83rem;
+      color: #6b7280;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .code-card {
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 16px;
+      border: 1px solid rgba(51, 65, 85, 0.95);
+      padding: 10px 11px 9px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.96);
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+    }
+
+    .code-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .code-editor {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      border-radius: var(--radius-md);
+      background: radial-gradient(circle at top left, #020617, #020617 50%, #000000);
+      border: 1px solid rgba(51, 65, 85, 0.96);
+      padding: 7px 8px 22px;
+      min-height: 110px;
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre;
+      tab-size: 2;
+      outline: none;
+    }
+
+    .code-editor::-webkit-scrollbar { width: 6px; }
+    .code-editor::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 1);
+      border-radius: 999px;
+    }
+
+    .code-footer {
+      margin-top: 6px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .footer-note {
+      font-size: 0.76rem;
+      color: #6b7280;
+      text-align: right;
+      padding: 0 4px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.98);
+      color: #e5e7eb;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.96);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 1);
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 99;
+    }
+
+    .toast.show {
+      display: inline-flex;
+      animation: toast-in 160ms ease-out;
+    }
+
+    @keyframes toast-in {
+      from { transform: translate(-50%, 6px); opacity: 0; }
+      to   { transform: translate(-50%, 0);   opacity: 1; }
+    }
+
+    .provider-select {
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      padding: 3px 8px;
+      font-size: 0.78rem;
+    }
+    .provider-select:focus {
+      outline: none;
+      border-color: #4ade80;
+    }
+    .ai-response-error {
+      color: #fecaca;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <!-- TOP: Prompt + controls -->
+  <section class="shell">
+    <div class="inner">
+      <div class="header-row">
+        <div class="brand">
+          <div class="orb">MS</div>
+          <div class="brand-text">
+            <h1>Multi‑LLM Studio</h1>
+            <span>Ask once. Compare models side by side.</span>
+          </div>
+        </div>
+        <div class="pill-row">
+          <div class="pill pill-primary">
+            <span class="dot"></span> Dual‑model compare
+          </div>
+          <div class="pill">
+            Real APIs · Node.js backend
+          </div>
+        </div>
+      </div>
+
+      <label for="prompt" class="prompt-label">
+        <span>Your prompt</span>
+        <span class="hint">
+          Describe what you want any AI to do · Press
+          <span class="kbd">⌘⏎</span>/<span class="kbd">Ctrl⏎</span> to run
+        </span>
+      </label>
+
+      <textarea
+        id="prompt"
+        placeholder="Describe what you want any AI to do"
+      ></textarea>
+
+      <div class="controls-row">
+        <div class="mode-toggle" aria-label="Model mode">
+          <button class="mode-btn active" id="mode-single">
+            <span class="icon">●</span> Single
+          </button>
+          <button class="mode-btn" id="mode-dual">
+            <span class="icon">▯▯</span> Dual
+          </button>
+        </div>
+
+        <div class="actions">
+          <button class="btn-secondary" id="clear-btn">⌫ Clear</button>
+          <button class="btn-primary" id="run-btn">
+            ⚡ Run
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTTOM: Responses + coding pad -->
+  <section class="layout-main">
+    <!-- Responses -->
+    <div class="responses-card">
+      <div class="resp-header">
+        <div class="resp-title">
+          AI Responses
+          <span class="badge" id="mode-label">Single model</span>
+        </div>
+        <div class="resp-hint" id="resp-hint">
+          Choose provider(s), then press <span class="mono">Run</span>.
+        </div>
+      </div>
+
+      <div id="columns" class="columns">
+        <!-- Left panel (Provider A) -->
+        <div class="panel" id="panel-left">
+          <div class="panel-header">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div class="model-pill">
+                <span class="model-dot" style="color:#22c55e;"></span>
+                <span class="panel-title" id="title-left">OpenAI (gpt‑4o)</span>
+              </div>
+              <select id="providerSelectLeft" class="provider-select">
+                <option value="openai">OpenAI (gpt‑4o / gpt‑4o‑mini)</option>
+                <option value="gemini">Google Gemini 2.0 Flash</option>
+                <option value="kimi">Kimi (Moonshot)</option>
+              </select>
+            </div>
+            <div class="status-pill" id="status-left">
+              <span class="status-dot"></span> idle
+            </div>
+          </div>
+          <div class="panel-body" id="body-left">
+            <div class="placeholder">
+              Responses will appear here.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel (Provider B) -->
+        <div class="panel" id="panel-right">
+          <div class="panel-header">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div class="model-pill">
+                <span class="model-dot" style="color:#38bdf8;"></span>
+                <span class="panel-title" id="title-right">Gemini (2.0 Flash)</span>
+              </div>
+              <select id="providerSelectRight" class="provider-select">
+                <option value="gemini">Google Gemini 2.0 Flash</option>
+                <option value="openai">OpenAI (gpt‑4o / gpt‑4o‑mini)</option>
+                <option value="kimi">Kimi (Moonshot)</option>
+              </select>
+            </div>
+            <div class="status-pill" id="status-right">
+              <span class="status-dot"></span> idle
+            </div>
+          </div>
+          <div class="panel-body" id="body-right">
+            <div class="placeholder">
+              Second provider responses will appear here.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coding pad -->
+    <div class="code-card">
+      <div class="code-header">
+        <div>
+          Multi‑LLM Coding Pad
+          <div class="code-sub">
+            Scratch space for prompts, snippets & notes.
+          </div>
+        </div>
+        <button class="btn-secondary" id="copy-code-btn">Copy pad</button>
+      </div>
+
+      <div id="code-editor" class="code-editor" contenteditable="true">
+# Example prompt you can try above:
+Explain what an API is in a hackathon context
+and then give a JavaScript code example that calls one.
+      </div>
+
+      <div class="code-footer">
+        <span id="code-len">0 chars</span>
+        <span>Tip: paste code here, then ask either model to review it.</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">
+    Backend expected at <span class="mono">/api/openai</span>,
+    <span class="mono">/api/gemini</span> and <span class="mono">/api/kimi</span>.
+  </div>
+</main>
+
+<div class="toast" id="toast">
+  <span id="toast-text"></span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  const promptEl = document.getElementById("prompt");
+  const runBtn = document.getElementById("run-btn");
+  const clearBtn = document.getElementById("clear-btn");
+  const modeSingleBtn = document.getElementById("mode-single");
+  const modeDualBtn = document.getElementById("mode-dual");
+  const modeLabel = document.getElementById("mode-label");
+  const respHint = document.getElementById("resp-hint");
+  const columns = document.getElementById("columns");
+
+  const statusLeft = document.getElementById("status-left");
+  const statusRight = document.getElementById("status-right");
+  const bodyLeft = document.getElementById("body-left");
+  const bodyRight = document.getElementById("body-right");
+  const titleLeft = document.getElementById("title-left");
+  const titleRight = document.getElementById("title-right");
+
+  const providerSelectLeft = document.getElementById("providerSelectLeft");
+  const providerSelectRight = document.getElementById("providerSelectRight");
+
+  const toast = document.getElementById("toast");
+  const toastText = document.getElementById("toast-text");
+
+  const codeEditor = document.getElementById("code-editor");
+  const codeLen = document.getElementById("code-len");
+  const copyCodeBtn = document.getElementById("copy-code-btn");
+
+  let mode = "single"; // "single" | "dual"
+  let running = false;
+
+  function showToast(msg, ms = 2200) {
+    toastText.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), ms);
+  }
+
+  function setMode(newMode) {
+    mode = newMode;
+    if (mode === "single") {
+      modeSingleBtn.classList.add("active");
+      modeDualBtn.classList.remove("active");
+      columns.classList.remove("two");
+      document.getElementById("panel-right").style.display = "none";
+      modeLabel.textContent = "Single model";
+      respHint.innerHTML = "Runs the selected provider in the left panel only.";
+    } else {
+      modeSingleBtn.classList.remove("active");
+      modeDualBtn.classList.add("active");
+      columns.classList.add("two");
+      document.getElementById("panel-right").style.display = "flex";
+      modeLabel.textContent = "Dual compare";
+      respHint.textContent = "Runs both selected providers on the same prompt.";
+    }
+  }
+
+  modeSingleBtn.addEventListener("click", () => setMode("single"));
+  modeDualBtn.addEventListener("click", () => setMode("dual"));
+
+  function setStatus(el, state) {
+    el.classList.remove("active", "error");
+    const dotSpan = el.querySelector(".status-dot");
+    dotSpan.classList.remove("pulse", "error");
+
+    if (state === "running") {
+      el.classList.add("active");
+      dotSpan.classList.add("pulse");
+      el.lastChild.nodeValue = " generating…";
+    } else if (state === "done") {
+      el.lastChild.nodeValue = " done";
+    } else if (state === "error") {
+      el.classList.add("error");
+      dotSpan.classList.add("error");
+      el.lastChild.nodeValue = " error";
+    } else {
+      el.lastChild.nodeValue = " idle";
+    }
+  }
+
+  function resetPanels() {
+    setStatus(statusLeft, "idle");
+    setStatus(statusRight, "idle");
+    bodyLeft.classList.remove("ai-response-error");
+    bodyRight.classList.remove("ai-response-error");
+    bodyLeft.innerHTML = '<div class="placeholder">Responses will appear here.</div>';
+    bodyRight.innerHTML = '<div class="placeholder">Second provider responses will appear here.</div>';
+  }
+
+  function providerToEndpointAndLabel(provider) {
+    if (provider === "openai") {
+      return { endpoint: "/api/openai", label: "OpenAI (gpt‑4o / gpt‑4o‑mini)" };
+    } else if (provider === "gemini") {
+      return { endpoint: "/api/gemini", label: "Gemini (Google 2.0 Flash)" };
+    } else if (provider === "kimi") {
+      return { endpoint: "/api/kimi", label: "Kimi (Moonshot)" };
+    }
+    throw new Error("Unknown provider: " + provider);
+  }
+
+  async function callProvider(provider, prompt) {
+    const { endpoint } = providerToEndpointAndLabel(provider);
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const detail = data.detail || data.error || JSON.stringify(data);
+      throw new Error(detail || ("HTTP " + res.status));
+    }
+    return data.text || "";
+  }
+
+  async function run() {
+    const prompt = promptEl.value.trim();
+    if (!prompt) {
+      showToast("Please enter a prompt first.");
+      return;
+    }
+    if (running) return;
+    running = true;
+    runBtn.disabled = true;
+    runBtn.textContent = "Running…";
+
+    resetPanels();
+
+    const providerLeft = providerSelectLeft.value;
+    const infoLeft = providerToEndpointAndLabel(providerLeft);
+    titleLeft.textContent = infoLeft.label;
+
+    const tasks = [];
+
+    // Left provider runs in all modes
+    setStatus(statusLeft, "running");
+    bodyLeft.innerHTML = '<span style="color:#9ca3af; font-size:0.84rem;">' +
+      infoLeft.label + " is thinking…</span>";
+
+    const leftPromise = callProvider(providerLeft, prompt)
+      .then(text => {
+        setStatus(statusLeft, "done");
+        bodyLeft.classList.remove("ai-response-error");
+        bodyLeft.innerHTML = marked.parse(text || "(No text returned.)");
+      })
+      .catch(err => {
+        console.error(err);
+        setStatus(statusLeft, "error");
+        bodyLeft.classList.add("ai-response-error");
+        bodyLeft.textContent = "Error from " + infoLeft.label + ":\n" +
+          (err.message || "request failed");
+      });
+    tasks.push(leftPromise);
+
+    if (mode === "dual") {
+      const providerRight = providerSelectRight.value;
+      const infoRight = providerToEndpointAndLabel(providerRight);
+      titleRight.textContent = infoRight.label;
+
+      setStatus(statusRight, "running");
+      bodyRight.innerHTML = '<span style="color:#9ca3af; font-size:0.84rem;">' +
+        infoRight.label + " is thinking…</span>";
+
+      const rightPromise = callProvider(providerRight, prompt)
+        .then(text => {
+          setStatus(statusRight, "done");
+          bodyRight.classList.remove("ai-response-error");
+          bodyRight.innerHTML = marked.parse(text || "(No text returned.)");
+        })
+        .catch(err => {
+          console.error(err);
+          setStatus(statusRight, "error");
+          bodyRight.classList.add("ai-response-error");
+          bodyRight.textContent = "Error from " + infoRight.label + ":\n" +
+            (err.message || "request failed");
+        });
+      tasks.push(rightPromise);
+    }
+
+    await Promise.allSettled(tasks);
+    running = false;
+    runBtn.disabled = false;
+    runBtn.textContent = "⚡ Run";
+  }
+
+  runBtn.addEventListener("click", run);
+  promptEl.addEventListener("keydown", e => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      run();
+    }
+  });
+
+  clearBtn.addEventListener("click", () => {
+    promptEl.value = "";
+    resetPanels();
+    showToast("Cleared prompt and responses.");
+  });
+
+  function updateCodeLen() {
+    const txt = codeEditor.innerText || "";
+    codeLen.textContent = txt.length + " chars";
+  }
+  codeEditor.addEventListener("input", updateCodeLen);
+  updateCodeLen();
+
+  copyCodeBtn.addEventListener("click", async () => {
+    const txt = codeEditor.innerText || "";
+    try {
+      await navigator.clipboard.writeText(txt);
+      showToast("Copied coding pad to clipboard.");
+    } catch (e) {
+      console.error(e);
+      showToast("Clipboard not available.");
+    }
+  });
+
+  // initial UI
+  setMode("single");
+</script>
+</body>
+</html>
