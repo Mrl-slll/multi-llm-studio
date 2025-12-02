@@ -14,27 +14,55 @@ function getRelevantContext(query, mode) {
   if (mode === 'academic') {
     let context = "You are a helpful AI assistant for UW-Madison students, specializing in academic support.\n\n";
     
-    // Check if query mentions specific course
+    // Check if query mentions specific course - use exact course code matching
     const courses = academicsKB.courses;
+    const courseMapping = academicsKB.courseMapping || {};
+    
+    // Find matching course with improved accuracy
+    let matchedCourse = null;
+    let matchedCourseId = null;
+    
     for (const [courseId, course] of Object.entries(courses)) {
-      if (lowerQuery.includes(courseId.toLowerCase().replace('_', ' ')) || 
-          lowerQuery.includes(courseId.toLowerCase().replace('_', ''))) {
-        context += `**${course.name} (${courseId.replace('_', ' ')})**\n`;
-        context += `Credits: ${course.credits} | Prerequisites: ${course.prerequisites}\n`;
-        context += `${course.description}\n\n`;
-        context += `Topics: ${course.topics.join(', ')}\n`;
-        context += `Difficulty: ${course.difficulty} | Workload: ${course.workload}\n\n`;
-        context += `**Tips:**\n${course.tips.map(t => `- ${t}`).join('\n')}\n\n`;
-        
-        // Add common questions if query seems like a question
-        if (lowerQuery.includes('?') || lowerQuery.includes('how') || lowerQuery.includes('what')) {
-          context += `**Common Questions:**\n`;
-          for (const [q, a] of Object.entries(course.common_questions)) {
-            context += `Q: ${q}\nA: ${a}\n\n`;
-          }
-        }
+      // Normalize course ID (e.g., "CS_300" -> "cs 300" and "cs300")
+      const normalizedId = courseId.toLowerCase().replace('_', ' ');
+      const compactId = courseId.toLowerCase().replace('_', '');
+      
+      // Check for exact course code match (e.g., "CS 300", "CS300")
+      if (lowerQuery.includes(normalizedId) || lowerQuery.includes(compactId)) {
+        matchedCourse = course;
+        matchedCourseId = courseId;
         break;
       }
+    }
+    
+    // If course found, provide detailed course information
+    if (matchedCourse && matchedCourseId) {
+      const displayId = matchedCourseId.replace('_', ' ');
+      context += `**${matchedCourse.name} (${displayId})**\n`;
+      context += `Credits: ${matchedCourse.credits} | Prerequisites: ${matchedCourse.prerequisites}\n`;
+      context += `${matchedCourse.description}\n\n`;
+      context += `**Topics Covered:**\n${matchedCourse.topics.map(t => `- ${t}`).join('\n')}\n\n`;
+      context += `Difficulty: ${matchedCourse.difficulty}\n`;
+      context += `Workload: ${matchedCourse.workload}\n\n`;
+      context += `**Study Tips for ${displayId}:**\n${matchedCourse.tips.map(t => `- ${t}`).join('\n')}\n\n`;
+      
+      // Add common questions if query seems like a question
+      if (matchedCourse.common_questions && 
+          (lowerQuery.includes('?') || lowerQuery.includes('how') || 
+           lowerQuery.includes('what') || lowerQuery.includes('is'))) {
+        context += `**Common Questions about ${displayId}:**\n`;
+        for (const [q, a] of Object.entries(matchedCourse.common_questions)) {
+          context += `Q: ${q}\nA: ${a}\n\n`;
+        }
+      }
+      
+      // Add professor tips if available
+      if (matchedCourse.professor_tips) {
+        context += `**Professor Tips:** ${matchedCourse.professor_tips}\n\n`;
+      }
+      
+      // Add note about correct course identification
+      context += `\n[Note: This information is specifically for ${displayId} - ${matchedCourse.name}. Make sure to verify you're asking about the correct course.]\n\n`;
     }
     
     // Add general study tips if query is about studying/exams
