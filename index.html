@@ -1,1105 +1,1178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Multi-LLM Studio</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UW-Madison Student Guidebook</title>
   <style>
-    :root {
-      --bg: #020617;
-      --bg-card: #020617;
-      --bg-elevated: #020617;
-      --border-subtle: #1e293b;
-      --accent: #22c55e;
-      --accent-soft: rgba(34, 197, 94, 0.16);
-      --accent-blue: #38bdf8;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --danger: #f97373;
-      --radius-lg: 14px;
-      --radius-md: 10px;
-      --shadow-soft: 0 24px 80px rgba(15, 23, 42, 0.9);
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        "Liberation Mono", "Courier New", monospace;
-      --transition-fast: 160ms ease-out;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    * { box-sizing: border-box; }
+    :root {
+      --cardinal-red: #C5050C;
+      --badger-red: #9B0000;
+      --white: #FFFFFF;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-800: #1F2937;
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --shadow-red: 0 10px 30px rgba(197, 5, 12, 0.3);
+    }
 
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: var(--font-sans);
-      background:
-        radial-gradient(circle at 0% -20%, #4f46e5 0, #020617 40%, #000000 100%);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--white);
+      color: var(--gray-800);
+      overflow-x: hidden;
     }
 
-    main {
+    /* Animated Background */
+    .floating-shapes {
+      position: fixed;
       width: 100%;
-      max-width: 1120px;
-      padding: 24px 14px 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    @media (min-width: 768px) {
-      main {
-        padding: 28px 22px 46px;
-      }
-    }
-
-    .shell {
-      background: rgba(15, 23, 42, 0.96);
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(16px) saturate(150%);
-      -webkit-backdrop-filter: blur(16px) saturate(150%);
-      padding: 18px 18px 16px;
-      position: relative;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
       overflow: hidden;
-    }
-
-    .shell::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at top left, rgba(59, 130, 246, 0.28), transparent 60%),
-        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.2), transparent 60%);
-      opacity: 0.9;
       pointer-events: none;
     }
 
-    .inner {
-      position: relative;
-      z-index: 1;
+    .shape {
+      position: absolute;
+      opacity: 0.1;
     }
 
-    .header-row {
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--cardinal-red);
+      border-radius: 50%;
+      top: 10%;
+      left: -150px;
+      animation: float1 20s ease-in-out infinite;
+    }
+
+    .shape-2 {
+      width: 200px;
+      height: 200px;
+      background: var(--badger-red);
+      border-radius: 50%;
+      top: 60%;
+      right: -100px;
+      animation: float2 25s ease-in-out infinite;
+    }
+
+    .shape-3 {
+      width: 150px;
+      height: 150px;
+      background: var(--cardinal-red);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      bottom: 20%;
+      left: 20%;
+      animation: float3 30s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(100px, -50px) rotate(180deg); }
+    }
+
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-150px, 100px) rotate(-180deg); }
+    }
+
+    @keyframes float3 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(50px, -100px) rotate(360deg); }
+    }
+
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 3px solid var(--cardinal-red);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .orb {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background:
-        conic-gradient(from 210deg, #22c55e, #38bdf8, #a855f7, #22c55e);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #020617;
+    .logo {
+      font-size: 1.5rem;
       font-weight: 800;
-      font-size: 0.9rem;
-      box-shadow:
-        0 0 0 2px #020617,
-        0 0 32px rgba(59, 130, 246, 0.9);
-    }
-
-    .brand-text {
+      color: var(--cardinal-red);
       display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .brand-text h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .brand-text span {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .pill {
-      border-radius: 999px;
-      padding: 3px 8px;
-      font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(148, 163, 184, 0.65);
-      background: rgba(15, 23, 42, 0.98);
-      color: #e5e7eb;
-    }
-
-    .pill-primary {
-      border-color: rgba(34, 197, 94, 0.85);
-      background: radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.2), rgba(15, 23, 42, 0.98));
-      color: #bbf7d0;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.95);
-    }
-
-    .prompt-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 4px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .hint {
-      font-size: 0.78rem;
-      color: #6b7280;
-    }
-
-    .kbd {
-      font-family: var(--font-mono);
-      font-size: 0.76rem;
-      padding: 1px 5px;
-      border-radius: 999px;
-      border: 1px solid rgba(31, 41, 55, 0.9);
-      background: rgba(15, 23, 42, 0.98);
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      resize: vertical;
-      padding: 10px 12px;
-      border-radius: var(--radius-lg);
-      font-size: 0.94rem;
-      font-family: var(--font-sans);
-      color: var(--text-main);
-      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.99), rgba(15, 23, 42, 0.96));
-      border: 1px solid rgba(51, 65, 85, 0.95);
-      outline: none;
-      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 1);
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
-                  transform var(--transition-fast), background var(--transition-fast);
-    }
-
-    textarea::placeholder {
-      color: #6b7280;
-    }
-
-    textarea:focus {
-      border-color: rgba(59, 130, 246, 0.95);
-      box-shadow:
-        0 0 0 1px rgba(37, 99, 235, 0.9),
-        0 18px 44px rgba(15, 23, 42, 1);
-      transform: translateY(-0.5px);
-    }
-
-    .controls-row {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
       align-items: center;
       gap: 10px;
     }
 
-    .mode-toggle {
-      display: inline-flex;
-      border-radius: 999px;
-      padding: 3px;
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      background: rgba(15, 23, 42, 0.98);
-      box-shadow: 0 13px 36px rgba(15, 23, 42, 1);
+    .logo-icon {
+      font-size: 2rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 120px 40px 80px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--cardinal-red) 0%, var(--badger-red) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      color: var(--gray-800);
+      margin-bottom: 40px;
+      animation: fadeInUp 1.2s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Main Modes Section */
+    .modes-section {
+      position: relative;
+      max-width: 1200px;
+      margin: -60px auto 80px;
+      padding: 0 40px;
+      z-index: 10;
+    }
+
+    .modes-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .mode-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 60px 40px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      border: 3px solid transparent;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .mode-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, var(--cardinal-red), var(--badger-red));
+    }
+
+    .mode-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: var(--shadow-red);
+      border-color: var(--cardinal-red);
+    }
+
+    .mode-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .mode-card:hover .mode-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .mode-card h2 {
+      font-size: 2rem;
+      color: var(--cardinal-red);
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .mode-card h3 {
+      font-size: 1.3rem;
+      color: var(--gray-800);
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+
+    .mode-features {
+      list-style: none;
+      margin-bottom: 35px;
+    }
+
+    .mode-features li {
+      padding: 12px 0;
+      color: var(--gray-800);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-features li::before {
+      content: '✓';
+      color: var(--cardinal-red);
+      font-weight: bold;
+      font-size: 1.3rem;
     }
 
     .mode-btn {
+      background: linear-gradient(135deg, var(--cardinal-red), var(--badger-red));
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.1rem;
       border: none;
-      background: transparent;
-      border-radius: 999px;
-      padding: 5px 12px;
-      font-size: 0.78rem;
-      color: #9ca3af;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-fast), color var(--transition-fast),
-                  transform var(--transition-fast);
+      width: 100%;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
     }
 
-    .mode-btn span.icon {
-      font-size: 0.82rem;
+    .mode-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl);
     }
 
-    .mode-btn.active {
-      background: linear-gradient(to right, rgba(59, 130, 246, 0.24), rgba(34, 197, 94, 0.24));
-      color: #e5e7eb;
-      transform: translateY(-0.5px);
+    .mode-btn:active {
+      transform: scale(0.98);
     }
 
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      justify-content: flex-end;
+    /* Features Showcase */
+    .features-section {
+      padding: 80px 40px;
+      background: var(--gray-50);
     }
 
-    button {
-      font-family: var(--font-sans);
+    .features-section h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: var(--cardinal-red);
+      margin-bottom: 60px;
+      font-weight: 700;
     }
 
-    .btn-primary {
-      border: none;
-      border-radius: 999px;
-      padding: 7px 18px;
-      font-size: 0.86rem;
-      font-weight: 560;
-      letter-spacing: 0.02em;
-      background: linear-gradient(120deg, #22c55e, #4ade80);
-      color: #022c22;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      box-shadow:
-        0 0 0 1px rgba(22, 163, 74, 0.9),
-        0 20px 52px rgba(16, 185, 129, 0.95);
-      transition: transform 140ms ease-out, box-shadow 140ms ease-out,
-                  filter 140ms ease-out;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px) scale(1.01);
-      box-shadow:
-        0 0 0 1px rgba(22, 163, 74, 1),
-        0 24px 64px rgba(22, 163, 74, 1);
-      filter: saturate(1.06);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.7;
-      cursor: default;
-      transform: none;
-      box-shadow:
-        0 0 0 1px rgba(22, 163, 74, 0.6),
-        0 10px 26px rgba(16, 185, 129, 0.6);
-    }
-
-    .btn-secondary {
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      background: rgba(15, 23, 42, 0.98);
-      color: #e5e7eb;
-      font-size: 0.78rem;
-      padding: 6px 12px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-fast), border-color var(--transition-fast),
-                  transform var(--transition-fast);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(15, 23, 42, 1);
-      border-color: rgba(148, 163, 184, 1);
-      transform: translateY(-0.5px);
-    }
-
-    .layout-main {
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto;
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 14px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
     }
 
-    @media (min-width: 900px) {
-      .layout-main {
-        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.1fr);
-      }
-    }
-
-    .responses-card {
-      background: rgba(15, 23, 42, 0.98);
+    .feature-card {
+      background: var(--white);
+      padding: 35px 25px;
       border-radius: 16px;
-      border: 1px solid rgba(51, 65, 85, 0.95);
-      padding: 11px 11px 9px;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.95);
+      text-align: center;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
     }
 
-    .resp-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+    .feature-card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--cardinal-red);
     }
 
-    .resp-title {
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: block;
     }
 
-    .badge {
-      font-size: 0.72rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.85);
-      background: rgba(15, 23, 42, 1);
-      color: #cbd5e1;
+    .feature-card h3 {
+      font-size: 1.2rem;
+      color: var(--cardinal-red);
+      margin-bottom: 10px;
     }
 
-    .resp-hint {
-      font-size: 0.76rem;
-      color: var(--text-muted);
+    .feature-card p {
+      font-size: 0.95rem;
+      color: var(--gray-800);
+      line-height: 1.5;
     }
 
-    .columns {
+    /* Stats Section */
+    .stats-section {
+      padding: 80px 40px;
+      background: var(--white);
+    }
+
+    .stats-container {
+      max-width: 1200px;
+      margin: 0 auto;
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      text-align: center;
     }
 
-    .columns.two {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .stat-card {
+      padding: 40px 20px;
     }
 
-    @media (max-width: 720px) {
-      .columns.two {
-        grid-template-columns: minmax(0, 1fr);
+    .stat-number {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--cardinal-red);
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 1.3rem;
+      color: var(--gray-800);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--gray-800);
+      color: var(--white);
+      padding: 40px;
+      text-align: center;
+    }
+
+    footer p {
+      margin-bottom: 15px;
+    }
+
+    footer a {
+      color: var(--cardinal-red);
+      text-decoration: none;
+      margin: 0 15px;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: var(--white);
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .modes-container {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
       }
     }
 
-    .panel {
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(51, 65, 85, 0.95);
-      background: radial-gradient(circle at top left, #020617, #020617 40%, #000000 100%);
-      padding: 7px 8px 8px;
-      min-height: 120px;
+    @media (max-width: 640px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Feature Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      position: relative;
+      background: white;
+      border-radius: 24px;
+      max-width: 700px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.4s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        transform: translateY(-50px) scale(0.95);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(197, 5, 12, 0.1);
+      border: none;
+      border-radius: 50%;
+      font-size: 24px;
+      color: var(--cardinal-red);
+      cursor: pointer;
+      transition: all 0.3s;
+      z-index: 10;
+    }
+
+    .modal-close:hover {
+      background: var(--cardinal-red);
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .modal-header {
+      height: 200px;
+      background: linear-gradient(135deg, var(--cardinal-red), var(--badger-red));
+      border-radius: 24px 24px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
       overflow: hidden;
     }
 
-    .panel-header {
+    .modal-header::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -150px;
+      right: -100px;
+    }
+
+    .modal-header::after {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      bottom: -100px;
+      left: -50px;
+    }
+
+    .modal-icon {
+      font-size: 80px;
+      z-index: 1;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+    }
+
+    .modal-body {
+      padding: 40px;
+    }
+
+    .modal-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--cardinal-red);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .modal-description {
+      color: var(--gray-800);
+      line-height: 1.8;
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    .modal-section {
+      margin-bottom: 24px;
+    }
+
+    .modal-section h4 {
+      font-size: 1.2rem;
+      color: var(--cardinal-red);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .modal-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .modal-list li {
+      padding: 8px 0 8px 28px;
+      color: var(--gray-800);
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .modal-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--cardinal-red);
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .modal-actions {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 32px;
     }
 
-    .model-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 1px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(71, 85, 105, 0.98);
-      background: rgba(15, 23, 42, 1);
-    }
-
-    .model-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      box-shadow: 0 0 9px currentColor;
-    }
-
-    .panel-title {
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-
-    .status-pill {
-      font-size: 0.72rem;
-      padding: 1px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 1);
-      background: rgba(15, 23, 42, 1);
-      color: #9ca3af;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: #22c55e;
-      box-shadow: 0 0 7px rgba(34, 197, 94, 0.9);
-    }
-
-    .status-pill.active {
-      border-color: rgba(34, 197, 94, 0.9);
-      color: #bbf7d0;
-      background: rgba(22, 163, 74, 0.1);
-    }
-
-    .status-pill.error {
-      border-color: rgba(248, 113, 113, 0.95);
-      background: rgba(127, 29, 29, 0.9);
-      color: #fecaca;
-    }
-
-    .status-dot.pulse {
-      animation: pulse 1s infinite alternate;
-    }
-
-    .status-dot.error {
-      background: #f97373;
-      box-shadow: 0 0 8px rgba(248, 113, 113, 1);
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(0.9); opacity: 0.7; }
-      100% { transform: scale(1.15); opacity: 1; }
-    }
-
-    .panel-body {
-      font-size: 0.86rem;
-      line-height: 1.5;
-      color: #e2e8f0;
-      max-height: 300px;
-      overflow-y: auto;
-      padding-right: 3px;
-      word-break: break-word;
-    }
-
-    /* Markdown styling */
-    .panel-body h1, .panel-body h2, .panel-body h3,
-    .panel-body h4, .panel-body h5, .panel-body h6 {
-      margin-top: 1em;
-      margin-bottom: 0.5em;
-      font-weight: 600;
-      color: #f1f5f9;
-    }
-
-    .panel-body h1 { font-size: 1.4rem; }
-    .panel-body h2 { font-size: 1.2rem; }
-    .panel-body h3 { font-size: 1.05rem; }
-
-    .panel-body p {
-      margin: 0.75em 0;
-    }
-
-    .panel-body ul, .panel-body ol {
-      margin: 0.5em 0;
-      padding-left: 1.5em;
-    }
-
-    .panel-body li {
-      margin: 0.25em 0;
-    }
-
-    .panel-body code {
-      font-family: var(--font-mono);
-      font-size: 0.85em;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(51, 65, 85, 0.7);
-      color: #fbbf24;
-    }
-
-    .panel-body pre {
-      margin: 0.75em 0;
-      padding: 10px;
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(51, 65, 85, 0.8);
-      overflow-x: auto;
-    }
-
-    .panel-body pre code {
-      padding: 0;
-      background: none;
+    .modal-btn {
+      flex: 1;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
       border: none;
-      color: #e2e8f0;
+      text-decoration: none;
+      text-align: center;
+      display: inline-block;
     }
 
-    .panel-body blockquote {
-      margin: 0.75em 0;
-      padding-left: 1em;
-      border-left: 3px solid rgba(34, 197, 94, 0.6);
-      color: #cbd5e1;
-      font-style: italic;
+    .modal-btn-primary {
+      background: linear-gradient(135deg, var(--cardinal-red), var(--badger-red));
+      color: white;
     }
 
-    .panel-body a {
-      color: #38bdf8;
-      text-decoration: underline;
+    .modal-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(197, 5, 12, 0.4);
     }
 
-    .panel-body a:hover {
-      color: #7dd3fc;
+    .modal-btn-secondary {
+      background: rgba(197, 5, 12, 0.1);
+      color: var(--cardinal-red);
     }
 
-    .panel-body strong {
-      font-weight: 600;
-      color: #f1f5f9;
-    }
-
-    .panel-body em {
-      font-style: italic;
-    }
-
-    .panel-body hr {
-      margin: 1em 0;
-      border: none;
-      border-top: 1px solid rgba(51, 65, 85, 0.8);
-    }
-
-    .panel-body table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 0.75em 0;
-    }
-
-    .panel-body th, .panel-body td {
-      border: 1px solid rgba(51, 65, 85, 0.8);
-      padding: 6px 10px;
-      text-align: left;
-    }
-
-    .panel-body th {
-      background: rgba(0, 0, 0, 0.4);
-      font-weight: 600;
-      color: #f1f5f9;
-    }
-
-    .panel-body::-webkit-scrollbar { width: 6px; }
-    .panel-body::-webkit-scrollbar-thumb {
-      background: rgba(51, 65, 85, 1);
-      border-radius: 999px;
-    }
-
-    .placeholder {
-      font-size: 0.83rem;
-      color: #6b7280;
-    }
-
-    .mono {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      padding: 1px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(31, 41, 55, 0.9);
-      background: rgba(15, 23, 42, 0.98);
-    }
-
-    .code-card {
-      background: rgba(15, 23, 42, 0.98);
-      border-radius: 16px;
-      border: 1px solid rgba(51, 65, 85, 0.95);
-      padding: 10px 11px 9px;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.96);
-    }
-
-    .code-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-      font-size: 0.88rem;
-    }
-
-    .code-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .code-editor {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      border-radius: var(--radius-md);
-      background: radial-gradient(circle at top left, #020617, #020617 50%, #000000);
-      border: 1px solid rgba(51, 65, 85, 0.96);
-      padding: 7px 8px 22px;
-      min-height: 110px;
-      max-height: 220px;
-      overflow-y: auto;
-      white-space: pre;
-      tab-size: 2;
-      outline: none;
-    }
-
-    .code-editor::-webkit-scrollbar { width: 6px; }
-    .code-editor::-webkit-scrollbar-thumb {
-      background: rgba(51, 65, 85, 1);
-      border-radius: 999px;
-    }
-
-    .code-footer {
-      margin-top: 6px;
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .footer-note {
-      font-size: 0.76rem;
-      color: #6b7280;
-      text-align: right;
-      padding: 0 4px;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.98);
-      color: #e5e7eb;
-      border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.96);
-      box-shadow: 0 18px 48px rgba(0, 0, 0, 1);
-      padding: 7px 12px;
-      font-size: 0.8rem;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      z-index: 99;
-    }
-
-    .toast.show {
-      display: inline-flex;
-      animation: toast-in 160ms ease-out;
-    }
-
-    @keyframes toast-in {
-      from { transform: translate(-50%, 6px); opacity: 0; }
-      to   { transform: translate(-50%, 0);   opacity: 1; }
-    }
-
-    .provider-select {
-      background: #020617;
-      color: #e5e7eb;
-      border-radius: 999px;
-      border: 1px solid #374151;
-      padding: 3px 8px;
-      font-size: 0.78rem;
-    }
-    .provider-select:focus {
-      outline: none;
-      border-color: #4ade80;
-    }
-    .ai-response-error {
-      color: #fecaca;
+    .modal-btn-secondary:hover {
+      background: rgba(197, 5, 12, 0.2);
     }
   </style>
 </head>
 <body>
-<main>
-  <!-- TOP: Prompt + controls -->
-  <section class="shell">
-    <div class="inner">
-      <div class="header-row">
-        <div class="brand">
-          <div class="orb">MS</div>
-          <div class="brand-text">
-            <h1>Multi‑LLM Studio</h1>
-            <span>Ask once. Compare models side by side.</span>
-          </div>
-        </div>
-        <div class="pill-row">
-          <div class="pill pill-primary">
-            <span class="dot"></span> Dual‑model compare
-          </div>
-          <div class="pill">
-            Real APIs · Node.js backend
-          </div>
-        </div>
-      </div>
-
-      <label for="prompt" class="prompt-label">
-        <span>Your prompt</span>
-        <span class="hint">
-          Describe what you want any AI to do · Press
-          <span class="kbd">⌘⏎</span>/<span class="kbd">Ctrl⏎</span> to run
-        </span>
-      </label>
-
-      <textarea
-        id="prompt"
-        placeholder="Describe what you want any AI to do"
-      ></textarea>
-
-      <div class="controls-row">
-        <div class="mode-toggle" aria-label="Model mode">
-          <button class="mode-btn active" id="mode-single">
-            <span class="icon">●</span> Single
-          </button>
-          <button class="mode-btn" id="mode-dual">
-            <span class="icon">▯▯</span> Dual
-          </button>
-        </div>
-
-        <div class="actions">
-          <button class="btn-secondary" id="clear-btn">⌫ Clear</button>
-          <button class="btn-primary" id="run-btn">
-            ⚡ Run
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- BOTTOM: Responses + coding pad -->
-  <section class="layout-main">
-    <!-- Responses -->
-    <div class="responses-card">
-      <div class="resp-header">
-        <div class="resp-title">
-          AI Responses
-          <span class="badge" id="mode-label">Single model</span>
-        </div>
-        <div class="resp-hint" id="resp-hint">
-          Choose provider(s), then press <span class="mono">Run</span>.
-        </div>
-      </div>
-
-      <div id="columns" class="columns">
-        <!-- Left panel (Provider A) -->
-        <div class="panel" id="panel-left">
-          <div class="panel-header">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <div class="model-pill">
-                <span class="model-dot" style="color:#22c55e;"></span>
-                <span class="panel-title" id="title-left">OpenAI (gpt‑4o)</span>
-              </div>
-              <select id="providerSelectLeft" class="provider-select">
-                <option value="openai">OpenAI (gpt‑4o / gpt‑4o‑mini)</option>
-                <option value="gemini">Google Gemini 2.0 Flash</option>
-                <option value="kimi">Kimi (Moonshot)</option>
-              </select>
-            </div>
-            <div class="status-pill" id="status-left">
-              <span class="status-dot"></span> idle
-            </div>
-          </div>
-          <div class="panel-body" id="body-left">
-            <div class="placeholder">
-              Responses will appear here.
-            </div>
-          </div>
-        </div>
-
-        <!-- Right panel (Provider B) -->
-        <div class="panel" id="panel-right">
-          <div class="panel-header">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <div class="model-pill">
-                <span class="model-dot" style="color:#38bdf8;"></span>
-                <span class="panel-title" id="title-right">Gemini (2.0 Flash)</span>
-              </div>
-              <select id="providerSelectRight" class="provider-select">
-                <option value="gemini">Google Gemini 2.0 Flash</option>
-                <option value="openai">OpenAI (gpt‑4o / gpt‑4o‑mini)</option>
-                <option value="kimi">Kimi (Moonshot)</option>
-              </select>
-            </div>
-            <div class="status-pill" id="status-right">
-              <span class="status-dot"></span> idle
-            </div>
-          </div>
-          <div class="panel-body" id="body-right">
-            <div class="placeholder">
-              Second provider responses will appear here.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Coding pad -->
-    <div class="code-card">
-      <div class="code-header">
-        <div>
-          Multi‑LLM Coding Pad
-          <div class="code-sub">
-            Scratch space for prompts, snippets & notes.
-          </div>
-        </div>
-        <button class="btn-secondary" id="copy-code-btn">Copy pad</button>
-      </div>
-
-      <div id="code-editor" class="code-editor" contenteditable="true">
-# Example prompt you can try above:
-Explain what an API is in a hackathon context
-and then give a JavaScript code example that calls one.
-      </div>
-
-      <div class="code-footer">
-        <span id="code-len">0 chars</span>
-        <span>Tip: paste code here, then ask either model to review it.</span>
-      </div>
-    </div>
-  </section>
-
-  <div class="footer-note">
-    Backend expected at <span class="mono">/api/openai</span>,
-    <span class="mono">/api/gemini</span> and <span class="mono">/api/kimi</span>.
+  <!-- Floating Shapes Background -->
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
   </div>
-</main>
 
-<div class="toast" id="toast">
-  <span id="toast-text"></span>
-</div>
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <span>UW-Madison Student Guidebook</span>
+      </div>
+    </div>
+  </header>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-  const promptEl = document.getElementById("prompt");
-  const runBtn = document.getElementById("run-btn");
-  const clearBtn = document.getElementById("clear-btn");
-  const modeSingleBtn = document.getElementById("mode-single");
-  const modeDualBtn = document.getElementById("mode-dual");
-  const modeLabel = document.getElementById("mode-label");
-  const respHint = document.getElementById("resp-hint");
-  const columns = document.getElementById("columns");
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Your AI-Powered Campus Companion</h1>
+    <p class="hero-subtitle">Navigate UW-Madison with Intelligence & Ease</p>
+  </section>
 
-  const statusLeft = document.getElementById("status-left");
-  const statusRight = document.getElementById("status-right");
-  const bodyLeft = document.getElementById("body-left");
-  const bodyRight = document.getElementById("body-right");
-  const titleLeft = document.getElementById("title-left");
-  const titleRight = document.getElementById("title-right");
+  <!-- Main Modes Section -->
+  <section class="modes-section">
+    <div class="modes-container">
+      <!-- Academic Mode Card -->
+      <div class="mode-card" onclick="window.location.href='/studio?mode=academic'">
+        <span class="mode-icon">📚</span>
+        <h2>ACADEMICS</h2>
+        <h3>Master Your Courses</h3>
+        <ul class="mode-features">
+          <li>Course Information & Prerequisites</li>
+          <li>Study Strategies & Tips</li>
+          <li>Assignment Help</li>
+          <li>Exam Preparation</li>
+          <li>Professor Recommendations</li>
+        </ul>
+        <a href="/studio?mode=academic" class="mode-btn">ENTER ACADEMIC MODE →</a>
+      </div>
 
-  const providerSelectLeft = document.getElementById("providerSelectLeft");
-  const providerSelectRight = document.getElementById("providerSelectRight");
+      <!-- Student Life Mode Card -->
+      <div class="mode-card" onclick="window.location.href='/studio?mode=studentlife'">
+        <span class="mode-icon">🏫</span>
+        <h2>STUDENT LIFE</h2>
+        <h3>Navigate Campus Life</h3>
+        <ul class="mode-features">
+          <li>Study Room Booking</li>
+          <li>Dining Reservations</li>
+          <li>Gym & Recreation Access</li>
+          <li>Health Services Navigation</li>
+          <li>Transportation & Housing</li>
+        </ul>
+        <a href="/studio?mode=studentlife" class="mode-btn">ENTER STUDENT LIFE MODE →</a>
+      </div>
+    </div>
+  </section>
 
-  const toast = document.getElementById("toast");
-  const toastText = document.getElementById("toast-text");
+  <!-- Features Showcase -->
+  <section class="features-section">
+    <h2>Powerful Features</h2>
+    <div class="features-grid">
+      <div class="feature-card" onclick="openFeatureModal('ai-models')">
+        <span class="feature-icon">🤖</span>
+        <h3>4 AI Models</h3>
+        <p>Groq, HuggingFace, Cohere, Kimi</p>
+      </div>
+      <div class="feature-card" onclick="openFeatureModal('smart-history')">
+        <span class="feature-icon">💾</span>
+        <h3>Smart History</h3>
+        <p>Save Q&A, Notes & Export</p>
+      </div>
+      <div class="feature-card" onclick="openFeatureModal('compare')">
+        <span class="feature-icon">📊</span>
+        <h3>Compare</h3>
+        <p>See AI responses side by side</p>
+      </div>
+      <div class="feature-card" onclick="openFeatureModal('rag-system')">
+        <span class="feature-icon">🎯</span>
+        <h3>RAG System</h3>
+        <p>Context-aware answers</p>
+      </div>
+      <div class="feature-card" onclick="openFeatureModal('notepad')">
+        <span class="feature-icon">📝</span>
+        <h3>Notepad</h3>
+        <p>Built-in note taking</p>
+      </div>
+      <div class="feature-card" onclick="openFeatureModal('search')">
+        <span class="feature-icon">🔍</span>
+        <h3>Search</h3>
+        <p>Find info quickly</p>
+      </div>
+      <div class="feature-card" onclick="openFeatureModal('fast')">
+        <span class="feature-icon">⚡</span>
+        <h3>Fast</h3>
+        <p>&lt;2 sec responses</p>
+      </div>
+      <div class="feature-card" onclick="openFeatureModal('uw-themed')">
+        <span class="feature-icon">🎨</span>
+        <h3>UW Themed</h3>
+        <p>Cardinal Red Design</p>
+      </div>
+    </div>
+  </section>
 
-  const codeEditor = document.getElementById("code-editor");
-  const codeLen = document.getElementById("code-len");
-  const copyCodeBtn = document.getElementById("copy-code-btn");
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-number">100+</div>
+        <div class="stat-label">Courses Covered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4</div>
+        <div class="stat-label">AI Models</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Available</div>
+      </div>
+    </div>
+  </section>
 
-  let mode = "single"; // "single" | "dual"
-  let running = false;
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 UW-Madison Student Guidebook</p>
+    <p>Built with ❤️ for Badgers</p>
+    <div>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
 
-  function showToast(msg, ms = 2200) {
-    toastText.textContent = msg;
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), ms);
-  }
+  <!-- Feature Modal -->
+  <div id="featureModal" class="modal">
+    <div class="modal-overlay" onclick="closeFeatureModal()"></div>
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeFeatureModal()">×</button>
+      
+      <div class="modal-header">
+        <div class="modal-icon" id="modalIcon">🤖</div>
+      </div>
+      
+      <div class="modal-body">
+        <h2 class="modal-title" id="modalTitle">Feature Title</h2>
+        <div id="modalBody"></div>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" onclick="closeFeatureModal()">Got it!</button>
+          <a href="/studio?mode=academic" class="modal-btn modal-btn-primary" id="modalCTA">Try it now →</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  function setMode(newMode) {
-    mode = newMode;
-    if (mode === "single") {
-      modeSingleBtn.classList.add("active");
-      modeDualBtn.classList.remove("active");
-      columns.classList.remove("two");
-      document.getElementById("panel-right").style.display = "none";
-      modeLabel.textContent = "Single model";
-      respHint.innerHTML = "Runs the selected provider in the left panel only.";
-    } else {
-      modeSingleBtn.classList.remove("active");
-      modeDualBtn.classList.add("active");
-      columns.classList.add("two");
-      document.getElementById("panel-right").style.display = "flex";
-      modeLabel.textContent = "Dual compare";
-      respHint.textContent = "Runs both selected providers on the same prompt.";
+  <script>
+    const featureData = {
+      'ai-models': {
+        icon: '🤖',
+        title: '4 AI Models',
+        content: `
+          <p class="modal-description">
+            Access four powerful AI language models simultaneously, each with unique strengths and capabilities. 
+            Compare different AI perspectives and choose the best model for your specific needs.
+          </p>
+          
+          <div class="modal-section">
+            <h4>Available Models:</h4>
+            <ul class="modal-list">
+              <li><strong>Groq (Llama 3.3)</strong> - Ultra-fast inference with cutting-edge performance. Perfect for quick answers and real-time interactions.</li>
+              <li><strong>HuggingFace (Llama 3.1)</strong> - Open-source powerhouse with strong reasoning capabilities and detailed explanations.</li>
+              <li><strong>Cohere (Command R)</strong> - Advanced reasoning and structured outputs. Excels at complex queries and analysis.</li>
+              <li><strong>Kimi (Moonshot)</strong> - Specialized model with strong context understanding and nuanced responses.</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>How It Works:</h4>
+            <ul class="modal-list">
+              <li>Choose between Single Model or Dual Comparison mode</li>
+              <li>Select which AI model(s) you want to use from the dropdown</li>
+              <li>Ask your question about UW-Madison courses or campus life</li>
+              <li>Get instant, intelligent responses from your chosen model(s)</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Why Multiple Models?</h4>
+            <ul class="modal-list">
+              <li>Different models have different strengths - compare to get the best answer</li>
+              <li>Some models are better at creative tasks, others at factual information</li>
+              <li>Dual mode lets you see multiple perspectives side-by-side</li>
+              <li>Free tier access to all 4 models - no limitations</li>
+            </ul>
+          </div>
+        `
+      },
+      'smart-history': {
+        icon: '💾',
+        title: 'Smart History',
+        content: `
+          <p class="modal-description">
+            Never lose track of your conversations. All your questions and AI responses are automatically saved 
+            with timestamps, searchable, and organized for easy access anytime.
+          </p>
+          
+          <div class="modal-section">
+            <h4>Key Features:</h4>
+            <ul class="modal-list">
+              <li><strong>Auto-Save</strong> - Every question is automatically saved to your browser's local storage</li>
+              <li><strong>Clickable History</strong> - Click any past question to instantly re-ask it</li>
+              <li><strong>Organized by Date</strong> - Questions grouped by Today, Yesterday, This Week, etc.</li>
+              <li><strong>Export Capability</strong> - Download your entire conversation history as JSON</li>
+              <li><strong>Privacy First</strong> - All data stored locally on your device, never uploaded</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>How to Access:</h4>
+            <ul class="modal-list">
+              <li>Click the ⚙️ settings icon in the top-right corner</li>
+              <li>Navigate to the "History" tab in the side panel</li>
+              <li>See all your past questions in chronological order</li>
+              <li>Click any question to re-ask it instantly</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Use Cases:</h4>
+            <ul class="modal-list">
+              <li>Review study tips you asked about weeks ago</li>
+              <li>Keep track of course information for registration</li>
+              <li>Build a personal knowledge base of campus resources</li>
+              <li>Share useful Q&A pairs with classmates (via export)</li>
+            </ul>
+          </div>
+        `
+      },
+      'compare': {
+        icon: '📊',
+        title: 'Dual Comparison Mode',
+        content: `
+          <p class="modal-description">
+            See responses from two different AI models side-by-side. Perfect for getting multiple perspectives, 
+            verifying information, or choosing the most helpful answer for your needs.
+          </p>
+          
+          <div class="modal-section">
+            <h4>How It Works:</h4>
+            <ul class="modal-list">
+              <li>Click the "Dual Comparison" toggle at the top of the studio</li>
+              <li>Two answer boxes appear side-by-side</li>
+              <li>Select a different AI model for each box (e.g., Groq vs Cohere)</li>
+              <li>Ask your question once - both models respond simultaneously</li>
+              <li>Compare the responses for accuracy, detail, and helpfulness</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Why Compare?</h4>
+            <ul class="modal-list">
+              <li><strong>Accuracy</strong> - Cross-check facts between different AI models</li>
+              <li><strong>Depth</strong> - Some models provide more detailed explanations</li>
+              <li><strong>Style</strong> - Different models have different communication styles</li>
+              <li><strong>Coverage</strong> - Get multiple angles on complex topics</li>
+              <li><strong>Confidence</strong> - Verify important information with multiple sources</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Best Use Cases:</h4>
+            <ul class="modal-list">
+              <li>Studying for exams - compare study strategies from different models</li>
+              <li>Course selection - get multiple perspectives on course difficulty</li>
+              <li>Complex topics - see different explanations of the same concept</li>
+              <li>Decision-making - weigh pros and cons from different viewpoints</li>
+            </ul>
+          </div>
+        `
+      },
+      'rag-system': {
+        icon: '🎯',
+        title: 'RAG System (Context-Aware)',
+        content: `
+          <p class="modal-description">
+            RAG (Retrieval-Augmented Generation) means our AI doesn't just guess - it pulls from a real 
+            knowledge base of UW-Madison information to give you accurate, relevant, campus-specific answers.
+          </p>
+          
+          <div class="modal-section">
+            <h4>What is RAG?</h4>
+            <ul class="modal-list">
+              <li><strong>Retrieval</strong> - Searches through UW-specific knowledge bases for relevant information</li>
+              <li><strong>Augmentation</strong> - Adds that real data to the AI's context before answering</li>
+              <li><strong>Generation</strong> - AI generates response based on actual UW facts, not generic info</li>
+              <li><strong>Result</strong> - You get accurate, UW-specific answers instead of generic responses</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Academic Mode Knowledge Base:</h4>
+            <ul class="modal-list">
+              <li>100+ course details (STAT 240, CS 200/300/400, MATH 221/222, etc.)</li>
+              <li>Prerequisites, credits, difficulty ratings, workload estimates</li>
+              <li>Study tips, exam strategies, professor recommendations</li>
+              <li>Tutoring resources (MERIT, GUTS), office hours, study spaces</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Student Life Mode Knowledge Base:</h4>
+            <ul class="modal-list">
+              <li>Study room booking guides (LibCal system, 4 library locations)</li>
+              <li>Dining halls, meal plans, food options across campus</li>
+              <li>Gym facilities (Nick, SERF, Bakke) with equipment and hours</li>
+              <li>Health services (UHS, CAPS mental health, 24/7 crisis support)</li>
+              <li>Housing neighborhoods, transportation (Metro routes, biking)</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Why It Matters:</h4>
+            <ul class="modal-list">
+              <li>Get real UW-specific information, not generic college advice</li>
+              <li>Accurate course details for registration planning</li>
+              <li>Up-to-date campus resource information</li>
+              <li>Trustworthy answers based on actual data, not AI hallucinations</li>
+            </ul>
+          </div>
+        `
+      },
+      'notepad': {
+        icon: '📝',
+        title: 'Built-in Notepad',
+        content: `
+          <p class="modal-description">
+            Take notes while chatting with AI. Your notepad auto-saves every few seconds, so you never lose 
+            important information, study tips, or reminders you want to keep.
+          </p>
+          
+          <div class="modal-section">
+            <h4>Features:</h4>
+            <ul class="modal-list">
+              <li><strong>Auto-Save</strong> - Notes automatically saved every 2 seconds to local storage</li>
+              <li><strong>Always Available</strong> - Access from the ⚙️ settings panel → Notepad tab</li>
+              <li><strong>Persistent</strong> - Notes survive browser refreshes and closures</li>
+              <li><strong>No Sign-In Required</strong> - Works completely offline, stored locally</li>
+              <li><strong>Privacy Protected</strong> - Notes never leave your device</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>How to Use:</h4>
+            <ul class="modal-list">
+              <li>Click the ⚙️ icon in the top-right corner</li>
+              <li>Select the "Notepad" tab from the side panel</li>
+              <li>Start typing - everything auto-saves automatically</li>
+              <li>Use it alongside AI responses to capture key points</li>
+              <li>Come back anytime - your notes are always there</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Great For:</h4>
+            <ul class="modal-list">
+              <li>Copying important AI responses to review later</li>
+              <li>Creating study guides from multiple questions</li>
+              <li>Tracking course registration plans and prerequisites</li>
+              <li>Saving campus resource locations and contact info</li>
+              <li>Building personalized cheat sheets for exams</li>
+              <li>Collecting tips from different AI models in one place</li>
+            </ul>
+          </div>
+        `
+      },
+      'search': {
+        icon: '🔍',
+        title: 'Quick Search',
+        content: `
+          <p class="modal-description">
+            Find past conversations instantly. Search through your entire question history by keyword, topic, 
+            or date to quickly locate information you asked about before.
+          </p>
+          
+          <div class="modal-section">
+            <h4>Search Capabilities:</h4>
+            <ul class="modal-list">
+              <li><strong>Keyword Search</strong> - Find questions containing specific words or phrases</li>
+              <li><strong>Topic Filtering</strong> - Browse by category (courses, dining, housing, etc.)</li>
+              <li><strong>Date Range</strong> - Filter by Today, This Week, This Month, or custom dates</li>
+              <li><strong>Instant Results</strong> - Live search as you type, no waiting</li>
+              <li><strong>Click to Re-ask</strong> - Click any result to instantly re-ask that question</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Use Cases:</h4>
+            <ul class="modal-list">
+              <li>Can't remember what AI said about STAT 240? Search "STAT 240"</li>
+              <li>Need that dining hall info again? Search "dining"</li>
+              <li>Looking for gym hours? Search "gym" or "workout"</li>
+              <li>Want to review study tips? Search "study tips" or "exam"</li>
+              <li>Forgot the study room booking steps? Search "study room"</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>How It Works:</h4>
+            <ul class="modal-list">
+              <li>Access your history from the ⚙️ settings panel</li>
+              <li>Type in the search box at the top of the History tab</li>
+              <li>Results filter instantly as you type</li>
+              <li>Click any question to view it or re-ask it</li>
+              <li>Clear search to see all questions again</li>
+            </ul>
+          </div>
+        `
+      },
+      'fast': {
+        icon: '⚡',
+        title: 'Lightning Fast Responses',
+        content: `
+          <p class="modal-description">
+            Get answers in under 2 seconds. Powered by Groq's ultra-fast inference engine, you'll never 
+            wait long for responses - perfect for quick lookups between classes or during study sessions.
+          </p>
+          
+          <div class="modal-section">
+            <h4>Speed Breakdown:</h4>
+            <ul class="modal-list">
+              <li><strong>Groq</strong> - 800+ tokens/sec, average 1-2 second responses</li>
+              <li><strong>HuggingFace</strong> - 3-5 second responses for detailed answers</li>
+              <li><strong>Cohere</strong> - 2-4 second responses with high accuracy</li>
+              <li><strong>Kimi</strong> - 3-6 second responses with deep context</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Why It's Fast:</h4>
+            <ul class="modal-list">
+              <li><strong>Optimized APIs</strong> - Direct connections to AI providers with minimal latency</li>
+              <li><strong>Serverless Architecture</strong> - Deployed on Vercel's global edge network</li>
+              <li><strong>Efficient RAG</strong> - Smart context loading only pulls relevant information</li>
+              <li><strong>Parallel Processing</strong> - Dual mode sends requests simultaneously</li>
+              <li><strong>No Queues</strong> - Free tier doesn't throttle or add wait times</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Perfect For:</h4>
+            <ul class="modal-list">
+              <li>Quick course lookups during registration periods</li>
+              <li>Finding dining hall hours on the go</li>
+              <li>Last-minute exam study tip searches</li>
+              <li>Checking gym or library hours between classes</li>
+              <li>Rapid-fire Q&A sessions when cramming</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Comparison:</h4>
+            <ul class="modal-list">
+              <li>ChatGPT Free: 10-15 second queue + response time</li>
+              <li>Claude: 5-10 second responses, limited free tier</li>
+              <li>Student Guidebook: <2 seconds, unlimited questions</li>
+            </ul>
+          </div>
+        `
+      },
+      'uw-themed': {
+        icon: '🎨',
+        title: 'UW-Madison Themed Design',
+        content: `
+          <p class="modal-description">
+            Built specifically for Badgers, with official UW-Madison cardinal red branding, smooth animations, 
+            and a professional, polished interface that feels right at home on campus.
+          </p>
+          
+          <div class="modal-section">
+            <h4>Design Elements:</h4>
+            <ul class="modal-list">
+              <li><strong>Cardinal Red (#C5050C)</strong> - Official UW-Madison primary color throughout</li>
+              <li><strong>Badger Red (#9B0000)</strong> - Secondary accent color for depth</li>
+              <li><strong>Professional Typography</strong> - Clean, readable Inter font family</li>
+              <li><strong>Smooth Animations</strong> - Subtle transitions and hover effects</li>
+              <li><strong>Responsive Layout</strong> - Works perfectly on phone, tablet, and desktop</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>UI/UX Features:</h4>
+            <ul class="modal-list">
+              <li>Floating shape animations in the background</li>
+              <li>Gradient buttons with shadow effects on hover</li>
+              <li>Card-based layout with depth and elevation</li>
+              <li>Sticky header that stays visible while scrolling</li>
+              <li>Collapsible side panel for tools without cluttering main view</li>
+              <li>Mode badges clearly showing Academic vs Student Life context</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Why It Matters:</h4>
+            <ul class="modal-list">
+              <li><strong>Brand Recognition</strong> - Feels like an official UW resource</li>
+              <li><strong>Trust</strong> - Professional design signals quality and reliability</li>
+              <li><strong>School Spirit</strong> - Cardinal and white colors show Badger pride</li>
+              <li><strong>Usability</strong> - Clean design makes features easy to find and use</li>
+              <li><strong>Accessibility</strong> - High contrast ratios for readability</li>
+            </ul>
+          </div>
+          
+          <div class="modal-section">
+            <h4>Mobile-Friendly:</h4>
+            <ul class="modal-list">
+              <li>Fully responsive - adapts to any screen size</li>
+              <li>Touch-optimized buttons and controls</li>
+              <li>Single-column layout on phones for easy reading</li>
+              <li>Side panel slides in from edge on mobile</li>
+              <li>Fast loading on campus WiFi or cellular</li>
+            </ul>
+          </div>
+        `
+      }
+    };
+
+    function openFeatureModal(featureId) {
+      const modal = document.getElementById('featureModal');
+      const data = featureData[featureId];
+      
+      if (!data) return;
+      
+      document.getElementById('modalIcon').textContent = data.icon;
+      document.getElementById('modalTitle').textContent = data.title;
+      document.getElementById('modalBody').innerHTML = data.content;
+      
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
-  }
 
-  modeSingleBtn.addEventListener("click", () => setMode("single"));
-  modeDualBtn.addEventListener("click", () => setMode("dual"));
-
-  function setStatus(el, state) {
-    el.classList.remove("active", "error");
-    const dotSpan = el.querySelector(".status-dot");
-    dotSpan.classList.remove("pulse", "error");
-
-    if (state === "running") {
-      el.classList.add("active");
-      dotSpan.classList.add("pulse");
-      el.lastChild.nodeValue = " generating…";
-    } else if (state === "done") {
-      el.lastChild.nodeValue = " done";
-    } else if (state === "error") {
-      el.classList.add("error");
-      dotSpan.classList.add("error");
-      el.lastChild.nodeValue = " error";
-    } else {
-      el.lastChild.nodeValue = " idle";
+    function closeFeatureModal() {
+      const modal = document.getElementById('featureModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
     }
-  }
 
-  function resetPanels() {
-    setStatus(statusLeft, "idle");
-    setStatus(statusRight, "idle");
-    bodyLeft.classList.remove("ai-response-error");
-    bodyRight.classList.remove("ai-response-error");
-    bodyLeft.innerHTML = '<div class="placeholder">Responses will appear here.</div>';
-    bodyRight.innerHTML = '<div class="placeholder">Second provider responses will appear here.</div>';
-  }
-
-  function providerToEndpointAndLabel(provider) {
-    if (provider === "openai") {
-      return { endpoint: "/api/openai", label: "OpenAI (gpt‑4o / gpt‑4o‑mini)" };
-    } else if (provider === "gemini") {
-      return { endpoint: "/api/gemini", label: "Gemini (Google 2.0 Flash)" };
-    } else if (provider === "kimi") {
-      return { endpoint: "/api/kimi", label: "Kimi (Moonshot)" };
-    }
-    throw new Error("Unknown provider: " + provider);
-  }
-
-  async function callProvider(provider, prompt) {
-    const { endpoint } = providerToEndpointAndLabel(provider);
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
+    // Close modal on ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeFeatureModal();
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      const detail = data.detail || data.error || JSON.stringify(data);
-      throw new Error(detail || ("HTTP " + res.status));
-    }
-    return data.text || "";
-  }
-
-  async function run() {
-    const prompt = promptEl.value.trim();
-    if (!prompt) {
-      showToast("Please enter a prompt first.");
-      return;
-    }
-    if (running) return;
-    running = true;
-    runBtn.disabled = true;
-    runBtn.textContent = "Running…";
-
-    resetPanels();
-
-    const providerLeft = providerSelectLeft.value;
-    const infoLeft = providerToEndpointAndLabel(providerLeft);
-    titleLeft.textContent = infoLeft.label;
-
-    const tasks = [];
-
-    // Left provider runs in all modes
-    setStatus(statusLeft, "running");
-    bodyLeft.innerHTML = '<span style="color:#9ca3af; font-size:0.84rem;">' +
-      infoLeft.label + " is thinking…</span>";
-
-    const leftPromise = callProvider(providerLeft, prompt)
-      .then(text => {
-        setStatus(statusLeft, "done");
-        bodyLeft.classList.remove("ai-response-error");
-        bodyLeft.innerHTML = marked.parse(text || "(No text returned.)");
-      })
-      .catch(err => {
-        console.error(err);
-        setStatus(statusLeft, "error");
-        bodyLeft.classList.add("ai-response-error");
-        bodyLeft.textContent = "Error from " + infoLeft.label + ":\n" +
-          (err.message || "request failed");
-      });
-    tasks.push(leftPromise);
-
-    if (mode === "dual") {
-      const providerRight = providerSelectRight.value;
-      const infoRight = providerToEndpointAndLabel(providerRight);
-      titleRight.textContent = infoRight.label;
-
-      setStatus(statusRight, "running");
-      bodyRight.innerHTML = '<span style="color:#9ca3af; font-size:0.84rem;">' +
-        infoRight.label + " is thinking…</span>";
-
-      const rightPromise = callProvider(providerRight, prompt)
-        .then(text => {
-          setStatus(statusRight, "done");
-          bodyRight.classList.remove("ai-response-error");
-          bodyRight.innerHTML = marked.parse(text || "(No text returned.)");
-        })
-        .catch(err => {
-          console.error(err);
-          setStatus(statusRight, "error");
-          bodyRight.classList.add("ai-response-error");
-          bodyRight.textContent = "Error from " + infoRight.label + ":\n" +
-            (err.message || "request failed");
-        });
-      tasks.push(rightPromise);
-    }
-
-    await Promise.allSettled(tasks);
-    running = false;
-    runBtn.disabled = false;
-    runBtn.textContent = "⚡ Run";
-  }
-
-  runBtn.addEventListener("click", run);
-  promptEl.addEventListener("keydown", e => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      run();
-    }
-  });
-
-  clearBtn.addEventListener("click", () => {
-    promptEl.value = "";
-    resetPanels();
-    showToast("Cleared prompt and responses.");
-  });
-
-  function updateCodeLen() {
-    const txt = codeEditor.innerText || "";
-    codeLen.textContent = txt.length + " chars";
-  }
-  codeEditor.addEventListener("input", updateCodeLen);
-  updateCodeLen();
-
-  copyCodeBtn.addEventListener("click", async () => {
-    const txt = codeEditor.innerText || "";
-    try {
-      await navigator.clipboard.writeText(txt);
-      showToast("Copied coding pad to clipboard.");
-    } catch (e) {
-      console.error(e);
-      showToast("Clipboard not available.");
-    }
-  });
-
-  // initial UI
-  setMode("single");
-</script>
+  </script>
 </body>
 </html>

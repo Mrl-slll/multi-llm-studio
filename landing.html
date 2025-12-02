@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UW-Madison Student Guidebook</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --cardinal-red: #C5050C;
+      --badger-red: #9B0000;
+      --white: #FFFFFF;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-800: #1F2937;
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --shadow-red: 0 10px 30px rgba(197, 5, 12, 0.3);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--white);
+      color: var(--gray-800);
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .floating-shapes {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .shape {
+      position: absolute;
+      opacity: 0.1;
+    }
+
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--cardinal-red);
+      border-radius: 50%;
+      top: 10%;
+      left: -150px;
+      animation: float1 20s ease-in-out infinite;
+    }
+
+    .shape-2 {
+      width: 200px;
+      height: 200px;
+      background: var(--badger-red);
+      border-radius: 50%;
+      top: 60%;
+      right: -100px;
+      animation: float2 25s ease-in-out infinite;
+    }
+
+    .shape-3 {
+      width: 150px;
+      height: 150px;
+      background: var(--cardinal-red);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      bottom: 20%;
+      left: 20%;
+      animation: float3 30s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(100px, -50px) rotate(180deg); }
+    }
+
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-150px, 100px) rotate(-180deg); }
+    }
+
+    @keyframes float3 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(50px, -100px) rotate(360deg); }
+    }
+
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 3px solid var(--cardinal-red);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--cardinal-red);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      font-size: 2rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 120px 40px 80px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--cardinal-red) 0%, var(--badger-red) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      color: var(--gray-800);
+      margin-bottom: 40px;
+      animation: fadeInUp 1.2s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Main Modes Section */
+    .modes-section {
+      position: relative;
+      max-width: 1200px;
+      margin: -60px auto 80px;
+      padding: 0 40px;
+      z-index: 10;
+    }
+
+    .modes-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .mode-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 60px 40px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      border: 3px solid transparent;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .mode-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, var(--cardinal-red), var(--badger-red));
+    }
+
+    .mode-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: var(--shadow-red);
+      border-color: var(--cardinal-red);
+    }
+
+    .mode-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .mode-card:hover .mode-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .mode-card h2 {
+      font-size: 2rem;
+      color: var(--cardinal-red);
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .mode-card h3 {
+      font-size: 1.3rem;
+      color: var(--gray-800);
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+
+    .mode-features {
+      list-style: none;
+      margin-bottom: 35px;
+    }
+
+    .mode-features li {
+      padding: 12px 0;
+      color: var(--gray-800);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-features li::before {
+      content: '✓';
+      color: var(--cardinal-red);
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+
+    .mode-btn {
+      background: linear-gradient(135deg, var(--cardinal-red), var(--badger-red));
+      color: var(--white);
+      padding: 18px 40px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .mode-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .mode-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Features Showcase */
+    .features-section {
+      padding: 80px 40px;
+      background: var(--gray-50);
+    }
+
+    .features-section h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: var(--cardinal-red);
+      margin-bottom: 60px;
+      font-weight: 700;
+    }
+
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      padding: 35px 25px;
+      border-radius: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 1.2rem;
+      color: var(--cardinal-red);
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+
+    /* Stats Section */
+    .stats-section {
+      padding: 80px 40px;
+      background: var(--white);
+    }
+
+    .stats-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      text-align: center;
+    }
+
+    .stat-card {
+      padding: 40px 20px;
+    }
+
+    .stat-number {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--cardinal-red);
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 1.3rem;
+      color: var(--gray-800);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--gray-800);
+      color: var(--white);
+      padding: 40px;
+      text-align: center;
+    }
+
+    footer p {
+      margin-bottom: 15px;
+    }
+
+    footer a {
+      color: var(--cardinal-red);
+      text-decoration: none;
+      margin: 0 15px;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: var(--white);
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .modes-container {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating Shapes Background -->
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <span>UW-Madison Student Guidebook</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Your AI-Powered Campus Companion</h1>
+    <p class="hero-subtitle">Navigate UW-Madison with Intelligence & Ease</p>
+  </section>
+
+  <!-- Main Modes Section -->
+  <section class="modes-section">
+    <div class="modes-container">
+      <!-- Academic Mode Card -->
+      <div class="mode-card" onclick="window.location.href='/studio?mode=academic'">
+        <span class="mode-icon">📚</span>
+        <h2>ACADEMICS</h2>
+        <h3>Master Your Courses</h3>
+        <ul class="mode-features">
+          <li>Course Information & Prerequisites</li>
+          <li>Study Strategies & Tips</li>
+          <li>Assignment Help</li>
+          <li>Exam Preparation</li>
+          <li>Professor Recommendations</li>
+        </ul>
+        <a href="/studio?mode=academic" class="mode-btn">ENTER ACADEMIC MODE →</a>
+      </div>
+
+      <!-- Student Life Mode Card -->
+      <div class="mode-card" onclick="window.location.href='/studio?mode=studentlife'">
+        <span class="mode-icon">🏫</span>
+        <h2>STUDENT LIFE</h2>
+        <h3>Navigate Campus Life</h3>
+        <ul class="mode-features">
+          <li>Study Room Booking</li>
+          <li>Dining Reservations</li>
+          <li>Gym & Recreation Access</li>
+          <li>Health Services Navigation</li>
+          <li>Transportation & Housing</li>
+        </ul>
+        <a href="/studio?mode=studentlife" class="mode-btn">ENTER STUDENT LIFE MODE →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Showcase -->
+  <section class="features-section">
+    <h2>Powerful Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🤖</span>
+        <h3>4 AI Models</h3>
+        <p>Groq, HuggingFace, Cohere, Kimi</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💾</span>
+        <h3>Smart History</h3>
+        <p>Save Q&A, Notes & Export</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <h3>Compare</h3>
+        <p>See 4 AI responses side by side</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎯</span>
+        <h3>RAG System</h3>
+        <p>Context-aware answers</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📝</span>
+        <h3>Notepad</h3>
+        <p>Built-in note taking</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔍</span>
+        <h3>Search</h3>
+        <p>Find info quickly</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h3>Fast</h3>
+        <p>&lt;2 sec responses</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎨</span>
+        <h3>UW Themed</h3>
+        <p>Cardinal Red Design</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-number">100+</div>
+        <div class="stat-label">Courses Covered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4</div>
+        <div class="stat-label">AI Models</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Available</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 UW-Madison Student Guidebook</p>
+    <p>Built with ❤️ for Badgers</p>
+    <div>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+</body>
+</html>
+
+    .shape {
+      position: absolute;
+      opacity: 0.1;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .shape1 {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #C5050C, #9B0000);
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      top: 10%;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .shape2 {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #0479A8, #005580);
+      border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+      top: 60%;
+      right: -50px;
+      animation-delay: 5s;
+    }
+
+    .shape3 {
+      width: 250px;
+      height: 250px;
+      background: linear-gradient(135deg, #C5050C, #0479A8);
+      border-radius: 50% 50% 30% 70% / 70% 30% 70% 30%;
+      bottom: 10%;
+      left: 50%;
+      animation-delay: 10s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(30px, -30px) rotate(90deg); }
+      50% { transform: translate(-20px, 20px) rotate(180deg); }
+      75% { transform: translate(20px, 30px) rotate(270deg); }
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      padding: 24px 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(197, 5, 12, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 800;
+      color: #C5050C;
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #C5050C;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 120px 20px 80px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 10px 24px;
+      background: linear-gradient(135deg, rgba(197, 5, 12, 0.1), rgba(4, 121, 168, 0.1));
+      border: 2px solid rgba(197, 5, 12, 0.3);
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 32px;
+      color: #C5050C;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 64px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+    }
+
+    h1 .highlight {
+      background: linear-gradient(135deg, #C5050C 0%, #0479A8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 24px;
+      color: #666;
+      margin-bottom: 48px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    /* Mode Selection Cards */
+    .mode-selection {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .mode-card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 3px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(197, 5, 12, 0.05), rgba(4, 121, 168, 0.05));
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .mode-card:hover::before {
+      opacity: 1;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(197, 5, 12, 0.15);
+      border-color: #C5050C;
+    }
+
+    .mode-card.academic {
+      border-color: rgba(197, 5, 12, 0.2);
+    }
+
+    .mode-card.studentlife {
+      border-color: rgba(4, 121, 168, 0.2);
+    }
+
+    .mode-card.academic:hover {
+      border-color: #C5050C;
+    }
+
+    .mode-card.studentlife:hover {
+      border-color: #0479A8;
+    }
+
+    .mode-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, #C5050C, #9B0000);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mode-card.studentlife .mode-icon {
+      background: linear-gradient(135deg, #0479A8, #005580);
+    }
+
+    .mode-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mode-description {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.7;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mode-features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mode-features li {
+      padding: 8px 0 8px 28px;
+      color: #555;
+      font-size: 15px;
+      position: relative;
+    }
+
+    .mode-features li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #C5050C;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .mode-card.studentlife .mode-features li::before {
+      color: #0479A8;
+    }
+
+    .mode-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: linear-gradient(135deg, #C5050C, #9B0000);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mode-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(197, 5, 12, 0.3);
+    }
+
+    .mode-card.studentlife .mode-btn {
+      background: linear-gradient(135deg, #0479A8, #005580);
+    }
+
+    .mode-card.studentlife .mode-btn:hover {
+      box-shadow: 0 8px 24px rgba(4, 121, 168, 0.3);
+    }
+
+    /* Features Section */
+    .features {
+      padding: 100px 20px;
+      background: white;
+    }
+
+    .section-title {
+      font-size: 48px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 16px;
+      color: #1a1a1a;
+    }
+
+    .section-subtitle {
+      font-size: 20px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 64px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: linear-gradient(135deg, #FFFFFF, #F9F9F9);
+      padding: 40px;
+      border-radius: 20px;
+      border: 2px solid rgba(197, 5, 12, 0.1);
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+      border-color: #C5050C;
+    }
+
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .feature-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+
+    .feature-text {
+      color: #666;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* Stats Section */
+    .stats {
+      padding: 80px 20px;
+      background: linear-gradient(135deg, #C5050C, #9B0000);
+      color: white;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 48px;
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 56px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: white;
+    }
+
+    .stat-label {
+      font-size: 18px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    /* How It Works */
+    .how-it-works {
+      padding: 100px 20px;
+      background: #F9F9F9;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .step {
+      text-align: center;
+      padding: 32px;
+      background: white;
+      border-radius: 20px;
+      border: 2px solid rgba(197, 5, 12, 0.1);
+    }
+
+    .step-number {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #C5050C, #9B0000);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0 auto 24px;
+    }
+
+    .step-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+
+    .step-text {
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      padding: 60px 20px 40px;
+      background: #1a1a1a;
+      color: white;
+      text-align: center;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      font-size: 28px;
+      font-weight: 800;
+      color: #C5050C;
+      margin-bottom: 24px;
+    }
+
+    .footer-text {
+      color: #999;
+      margin-bottom: 32px;
+      font-size: 15px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .footer-links a {
+      color: #999;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: #C5050C;
+    }
+
+    .copyright {
+      color: #666;
+      font-size: 14px;
+      padding-top: 24px;
+      border-top: 1px solid #333;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 40px;
+      }
+
+      .hero-subtitle {
+        font-size: 18px;
+      }
+
+      .mode-selection {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .section-title {
+        font-size: 36px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-shapes">
+    <div class="shape shape1"></div>
+    <div class="shape shape2"></div>
+    <div class="shape shape3"></div>
+  </div>
+
+  <header>
+    <div class="container">
+      <nav>
+        <a href="/" class="logo">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#C5050C"/>
+            <path d="M2 17L12 22L22 17" stroke="#C5050C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="#0479A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Student Guidebook
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="/studio">Launch Studio</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">🦡 Official UW-Madison AI Assistant</div>
+      <h1>
+        Your <span class="highlight">AI-Powered</span><br>
+        UW-Madison Guide
+      </h1>
+      <p class="hero-subtitle">
+        Get instant, accurate answers about courses, campus life, and everything UW-Madison. 
+        Powered by 4 advanced AI models trained on real campus data.
+      </p>
+    </div>
+  </section>
+
+  <section class="mode-selection">
+    <div class="mode-card academic">
+      <div class="mode-icon">📚</div>
+      <h2 class="mode-title">Academic Mode</h2>
+      <p class="mode-description">
+        Get expert help with courses, studying, and academic resources. Ask about specific classes, 
+        exam prep strategies, or where to find tutoring.
+      </p>
+      <ul class="mode-features">
+        <li>Detailed course information (STAT 240, CS 200-400, MATH 221/222)</li>
+        <li>Study tips and exam preparation strategies</li>
+        <li>Tutoring resources (MERIT, GUTS, office hours)</li>
+        <li>Prerequisites, difficulty levels, and workload estimates</li>
+        <li>Professor tips and common student questions</li>
+      </ul>
+      <a href="/studio?mode=academic" class="mode-btn">Launch Academic Mode</a>
+    </div>
+
+    <div class="mode-card studentlife">
+      <div class="mode-icon">🏫</div>
+      <h2 class="mode-title">Student Life Mode</h2>
+      <p class="mode-description">
+        Navigate campus life with ease. Book study rooms, find dining options, access health services, 
+        and discover everything Madison has to offer.
+      </p>
+      <ul class="mode-features">
+        <li>Study room booking guide (LibCal, Memorial, College libraries)</li>
+        <li>Dining halls, meal plans, and food options</li>
+        <li>Gym access (Nick, SERF, Bakke) and recreation info</li>
+        <li>Health services (UHS, CAPS mental health support)</li>
+        <li>Housing advice and transportation tips (Metro, biking)</li>
+      </ul>
+      <a href="/studio?mode=studentlife" class="mode-btn">Launch Student Life Mode</a>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="container">
+      <h2 class="section-title">Why Students Love This Tool</h2>
+      <p class="section-subtitle">
+        Built by Badgers, for Badgers. Get accurate answers instantly.
+      </p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3 class="feature-title">UW-Specific Knowledge</h3>
+          <p class="feature-text">
+            Trained on real UW-Madison course data, campus resources, and student experiences. 
+            Not generic answers—real Badger intel.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3 class="feature-title">4 AI Models, One Click</h3>
+          <p class="feature-text">
+            Compare responses from Groq, HuggingFace, Cohere, and Kimi simultaneously. 
+            Get the best answer every time.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3 class="feature-title">Free & Private</h3>
+          <p class="feature-text">
+            100% free for all UW students. Your questions stay private—no data sold, no tracking.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📖</div>
+          <h3 class="feature-title">Comprehensive Coverage</h3>
+          <p class="feature-text">
+            From STAT 240 homework to gym hours, meal plans to mental health resources. 
+            We've got answers.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💡</div>
+          <h3 class="feature-title">Smart Recommendations</h3>
+          <p class="feature-text">
+            Get personalized study tips, course difficulty ratings, and workload estimates 
+            based on real student feedback.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3 class="feature-title">Always Up-to-Date</h3>
+          <p class="feature-text">
+            Current course info, library hours, dining options, and campus events. 
+            Updated regularly for accuracy.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h3 class="feature-title">Natural Conversation</h3>
+          <p class="feature-text">
+            Ask questions like you would to a friend. No complex search terms—just type 
+            what you want to know.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3 class="feature-title">Mobile-Friendly</h3>
+          <p class="feature-text">
+            Access from anywhere—phone, tablet, laptop. Get help on the go between classes 
+            or late-night study sessions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-number">6+</div>
+          <div class="stat-label">Major Courses Covered</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">4</div>
+          <div class="stat-label">AI Models Integrated</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">50+</div>
+          <div class="stat-label">Campus Resources Mapped</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Free for Students</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">
+        Three simple steps to get the answers you need
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Choose Your Mode</h3>
+          <p class="step-text">
+            Select Academic Mode for course help or Student Life Mode for campus resources. 
+            Each mode is optimized for different questions.
+          </p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Ask Your Question</h3>
+          <p class="step-text">
+            Type naturally—"What's STAT 240 like?" or "How do I book a study room?" 
+            The AI understands context.
+          </p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Compare Responses</h3>
+          <p class="step-text">
+            Get answers from 4 AI models side-by-side. Pick the most helpful response 
+            or combine insights from multiple models.
+          </p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3 class="step-title">Save & Reference</h3>
+          <p class="step-text">
+            Save important answers to your notes. Export conversations for later reference 
+            during study sessions or planning.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">UW-Madison Student Guidebook</div>
+      <p class="footer-text">
+        An AI-powered assistant helping Badgers navigate academic and campus life. 
+        Built with ❤️ for the UW community.
+      </p>
+      <ul class="footer-links">
+        <li><a href="/studio">Launch Studio</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="https://www.wisc.edu" target="_blank">UW-Madison</a></li>
+      </ul>
+      <div class="copyright">
+        © 2024 UW-Madison Student Guidebook. Not officially affiliated with UW-Madison. 
+        For educational purposes.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Animate stats on scroll
+    const observerOptions = {
+      threshold: 0.5,
+      rootMargin: '0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .step, .stat').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s, transform 0.6s';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
