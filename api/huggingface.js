@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
     const text = data.choices?.[0]?.message?.content?.trim() || "(No response)";
 
     return res.status(200).json({
-      answer: text,
+      text: text,
       model: "meta-llama/Llama-3.1-8B-Instruct"
     });
 
