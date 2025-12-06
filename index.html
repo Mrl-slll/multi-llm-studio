@@ -686,8 +686,8 @@
     <div class="features-grid">
       <div class="feature-card" onclick="openFeatureModal('ai-models')">
         <span class="feature-icon">🤖</span>
-        <h3>5 AI Models</h3>
-        <p>Groq, Gemini, HuggingFace, Cohere, Kimi</p>
+        <h3>4 AI Models</h3>
+        <p>Groq, HuggingFace, Cohere, Kimi</p>
       </div>
       <div class="feature-card" onclick="openFeatureModal('smart-history')">
         <span class="feature-icon">💾</span>
@@ -782,10 +782,10 @@
     const featureData = {
       'ai-models': {
         icon: '🤖',
-        title: '5 AI Models',
+        title: '4 AI Models',
         content: `
           <p class="modal-description">
-            Access five powerful AI language models simultaneously, each with unique strengths and capabilities. 
+            Access four powerful AI language models simultaneously, each with unique strengths and capabilities. 
             Compare different AI perspectives and choose the best model for your specific needs.
           </p>
           
@@ -793,7 +793,6 @@
             <h4>Available Models:</h4>
             <ul class="modal-list">
               <li><strong>Groq (Llama 3.3)</strong> - Ultra-fast inference with cutting-edge performance. Perfect for quick answers and real-time interactions.</li>
-              <li><strong>Gemini 2.0 Flash</strong> - Google's latest model with exceptional speed and quality. FREE tier with 1,500 requests/day.</li>
               <li><strong>HuggingFace (Llama 3.1)</strong> - Open-source powerhouse with strong reasoning capabilities and detailed explanations.</li>
               <li><strong>Cohere (Command R)</strong> - Advanced reasoning and structured outputs. Excels at complex queries and analysis.</li>
               <li><strong>Kimi (Moonshot)</strong> - Specialized model with strong context understanding and nuanced responses.</li>
@@ -1055,7 +1054,6 @@
             <h4>Speed Breakdown:</h4>
             <ul class="modal-list">
               <li><strong>Groq</strong> - 800+ tokens/sec, average 1-2 second responses</li>
-              <li><strong>Gemini 2.0 Flash</strong> - 1-2 second responses, optimized for speed</li>
               <li><strong>HuggingFace</strong> - 3-5 second responses for detailed answers</li>
               <li><strong>Cohere</strong> - 2-4 second responses with high accuracy</li>
               <li><strong>Kimi</strong> - 3-6 second responses with deep context</li>
