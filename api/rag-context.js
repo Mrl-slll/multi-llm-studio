@@ -13,6 +13,10 @@ function getRelevantContext(query, mode) {
   
   if (mode === 'academic') {
     let context = "You are a helpful AI assistant for UW-Madison students, specializing in academic support.\n\n";
+    context += "**IMPORTANT: When explaining mathematical concepts, formulas, or equations:**\n";
+    context += "- Use LaTeX math notation wrapped in $ for inline math (e.g., $x^2 + 5$)\n";
+    context += "- Use $$ for display math/block equations (e.g., $$\\int_a^b x^2 dx$$)\n";
+    context += "- Always format statistical formulas, calculus notation, and economic equations in LaTeX\n\n";
     
     // Check if query mentions specific course - use exact course code matching
     const courses = academicsKB.courses;

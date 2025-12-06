@@ -58,7 +58,9 @@ module.exports = {
         "Do I need programming experience?": "No, STAT 240 is designed for beginners. You'll learn R from scratch. However, be prepared for a learning curve if you've never coded before.",
         "What's the workload like?": "Expect 8-10 hours per week. Assignments can be time-consuming if you're new to coding, but they get easier as you learn R.",
         "Is it hard?": "Moderate difficulty. The statistical concepts aren't too complex, but R syntax takes practice. Most students find it manageable with consistent effort.",
-        "What can I do with this course?": "STAT 240 is great for data science, research, biostatistics, or any field requiring data analysis. It's also a prerequisite for advanced statistics courses."
+        "What can I do with this course?": "STAT 240 is great for data science, research, biostatistics, or any field requiring data analysis. It's also a prerequisite for advanced statistics courses.",
+        "What is a confidence interval?": "A confidence interval estimates a population parameter with a given confidence level. For example, a 95% confidence interval for the mean is: $$\\bar{x} \\pm t_{\\alpha/2} \\cdot \\frac{s}{\\sqrt{n}}$$ where $\\bar{x}$ is the sample mean, $s$ is standard deviation, $n$ is sample size, and $t_{\\alpha/2}$ is the critical value.",
+        "How do you calculate standard deviation?": "Standard deviation measures spread in data. The sample standard deviation is: $$s = \\sqrt{\\frac{\\sum_{i=1}^{n}(x_i - \\bar{x})^2}{n-1}}$$ where $x_i$ are data points, $\\bar{x}$ is the mean, and $n$ is sample size."
       },
       professor_tips: "Attend office hours early in semester, participate in discussion sections, and practice coding problems beyond assignments"
     },
@@ -204,7 +206,12 @@ module.exports = {
         "Understand concepts, don't just memorize formulas",
         "Review limits and algebra skills early",
         "Form study groups for difficult problem sets"
-      ]
+      ],
+      common_questions: {
+        "What is a derivative?": "The derivative measures instantaneous rate of change. Formally: $$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$ It tells you the slope of the tangent line at any point on the curve $y = f(x)$.",
+        "How do you use the chain rule?": "The chain rule finds derivatives of composite functions. If $y = f(g(x))$, then: $$\\frac{dy}{dx} = f'(g(x)) \\cdot g'(x)$$ Example: for $y = (x^2 + 1)^3$, we get $\\frac{dy}{dx} = 3(x^2 + 1)^2 \\cdot 2x = 6x(x^2 + 1)^2$",
+        "What is the Fundamental Theorem of Calculus?": "It connects derivatives and integrals: $$\\frac{d}{dx}\\int_a^x f(t)dt = f(x)$$ and $$\\int_a^b f'(x)dx = f(b) - f(a)$$ This says integration and differentiation are inverse operations."
+      }
     },
     
     "MATH 222": {
@@ -237,7 +244,9 @@ module.exports = {
         "Is MATH 222 harder than MATH 221?": "Yes, for most students. The concepts are more abstract (especially series) and integration techniques require more creativity.",
         "What convergence tests should I know?": "Ratio test, root test, integral test, comparison test, limit comparison test, alternating series test, and divergence test.",
         "How important are Taylor series?": "Very important - they appear on exams and are foundational for MATH 234 and engineering courses.",
-        "Can I take MATH 234 without MATH 222?": "No, MATH 222 is a prerequisite for MATH 234 (Multivariable Calculus)."
+        "Can I take MATH 234 without MATH 222?": "No, MATH 222 is a prerequisite for MATH 234 (Multivariable Calculus).",
+        "What is integration by parts?": "Integration by parts solves $\\int u\\,dv = uv - \\int v\\,du$. Choose $u$ and $dv$ wisely. Example: for $\\int x e^x dx$, let $u = x$ and $dv = e^x dx$, giving $\\int x e^x dx = xe^x - \\int e^x dx = xe^x - e^x + C$.",
+        "How do you test if a series converges?": "Use the appropriate test based on the series form. For example, the ratio test: if $\\lim_{n \\to \\infty} |\\frac{a_{n+1}}{a_n}| = L$, then the series $\\sum a_n$ converges if $L < 1$ and diverges if $L > 1$."
       }
     },
     
@@ -430,7 +439,9 @@ module.exports = {
         "How much calculus is in ECON 301?": "Extensive - derivatives for optimization, partial derivatives for comparative statics. Strong calculus skills are essential.",
         "Is ECON 301 required for Econ major?": "Yes, it's a core requirement for the Economics major.",
         "What's different from ECON 101?": "ECON 301 is much more mathematical and theoretical. ECON 101 is conceptual; ECON 301 uses formal models.",
-        "Can I take ECON 301 and 302 together?": "Possible but challenging - both are math-heavy. Most students take them sequentially."
+        "Can I take ECON 301 and 302 together?": "Possible but challenging - both are math-heavy. Most students take them sequentially.",
+        "What is the First Welfare Theorem?": "The First Welfare Theorem states that under perfect competition with complete markets and no externalities, any competitive equilibrium is Pareto efficient. Mathematically, if $(x^*, p^*)$ is a competitive equilibrium where $x^*$ maximizes utility subject to budget constraint $p \\cdot x \\leq p \\cdot \\omega$ for all consumers, then no reallocation can make someone better off without making someone else worse off. This is a fundamental result showing markets can achieve efficiency.",
+        "How do you solve utility maximization problems?": "Use the Lagrangian method: maximize $U(x_1, x_2)$ subject to $p_1x_1 + p_2x_2 = m$. Set up $\\mathcal{L} = U(x_1, x_2) - \\lambda(p_1x_1 + p_2x_2 - m)$, then solve $\\frac{\\partial \\mathcal{L}}{\\partial x_1} = 0$, $\\frac{\\partial \\mathcal{L}}{\\partial x_2} = 0$, and $\\frac{\\partial \\mathcal{L}}{\\partial \\lambda} = 0$ to find optimal consumption bundle."
       },
       professor_tips: "Practice optimization problems extensively, understand the mathematics behind economic models, and review game theory basics"
     },
