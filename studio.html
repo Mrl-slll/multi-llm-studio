@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Marked.js for Markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -245,6 +249,34 @@
       border-radius: 4px;
       font-family: 'Courier New', monospace;
       font-size: 14px;
+    }
+
+    /* KaTeX Math Styling */
+    .katex {
+      font-size: 1.1em;
+    }
+
+    .katex-display {
+      margin: 16px 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .katex-display > .katex {
+      text-align: center;
+    }
+
+    /* Inline math */
+    .response-content .katex {
+      color: #1a1a1a;
+    }
+
+    /* Display math (block equations) */
+    .response-content .katex-display {
+      background: rgba(197, 5, 12, 0.03);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid #C5050C;
     }
 
     .response-content pre {
@@ -928,6 +960,17 @@
         
         // Render markdown
         responseEl.innerHTML = marked.parse(text);
+        
+        // Render math with KaTeX
+        renderMathInElement(responseEl, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false}
+          ],
+          throwOnError: false
+        });
         
         statusEl.textContent = 'Success';
         statusEl.className = 'provider-status ready';
