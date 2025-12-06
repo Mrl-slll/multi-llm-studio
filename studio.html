@@ -637,6 +637,7 @@
           <select class="model-selector" id="model-1">
             <option value="groq">⚡ Groq (Llama 3.3)</option>
             <option value="hf">🤗 HuggingFace (Llama 3.1)</option>
+            <option value="gemini">✨ Gemini 2.0 Flash</option>
             <option value="cohere">🔮 Cohere (Command R)</option>
             <option value="kimi">🌙 Kimi (Moonshot)</option>
           </select>
@@ -815,6 +816,7 @@
     const providers = {
       'groq': { endpoint: '/api/openai', name: '⚡ Groq (Llama 3.3)' },
       'hf': { endpoint: '/api/huggingface', name: '🤗 HuggingFace (Llama 3.1)' },
+      'gemini': { endpoint: '/api/gemini', name: '✨ Gemini 2.0 Flash' },
       'cohere': { endpoint: '/api/deepseek', name: '🔮 Cohere (Command R)' },
       'kimi': { endpoint: '/api/kimi', name: '🌙 Kimi (Moonshot)' }
     };
@@ -856,6 +858,7 @@
               <select class="model-selector" id="model-2">
                 <option value="groq">⚡ Groq (Llama 3.3)</option>
                 <option value="hf" selected>🤗 HuggingFace (Llama 3.1)</option>
+                <option value="gemini">✨ Gemini 2.0 Flash</option>
                 <option value="cohere">🔮 Cohere (Command R)</option>
                 <option value="kimi">🌙 Kimi (Moonshot)</option>
               </select>
