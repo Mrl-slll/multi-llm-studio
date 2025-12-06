@@ -392,12 +392,36 @@
       padding: 24px;
       background: linear-gradient(135deg, #C5050C, #9B0000);
       color: white;
+      position: relative;
     }
 
     .panel-title {
       font-size: 20px;
       font-weight: 700;
       margin-bottom: 16px;
+    }
+
+    .panel-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .panel-close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
     }
 
     .panel-tabs {
@@ -613,6 +637,7 @@
           <select class="model-selector" id="model-1">
             <option value="groq">⚡ Groq (Llama 3.3)</option>
             <option value="hf">🤗 HuggingFace (Llama 3.1)</option>
+            <option value="gemini">✨ Gemini 2.0 Flash</option>
             <option value="cohere">🔮 Cohere (Command R)</option>
             <option value="kimi">🌙 Kimi (Moonshot)</option>
           </select>
@@ -629,6 +654,7 @@
   <div class="side-panel" id="sidePanel">
     <div class="panel-header">
       <div class="panel-title">Assistant Tools</div>
+      <button class="panel-close-btn" id="panelClose">✕</button>
       <div class="panel-tabs">
         <button class="tab-btn active" data-tab="history">History</button>
         <button class="tab-btn" data-tab="notepad">Notepad</button>
@@ -679,10 +705,15 @@
 
     // Panel toggle
     const panelToggle = document.getElementById('panelToggle');
+    const panelClose = document.getElementById('panelClose');
     const sidePanel = document.getElementById('sidePanel');
     
     panelToggle.addEventListener('click', () => {
       sidePanel.classList.toggle('open');
+    });
+
+    panelClose.addEventListener('click', () => {
+      sidePanel.classList.remove('open');
     });
 
     // Tab switching
@@ -784,7 +815,8 @@
     // API calls
     const providers = {
       'groq': { endpoint: '/api/openai', name: '⚡ Groq (Llama 3.3)' },
-      'hf': { endpoint: '/api/gemini', name: '🤗 HuggingFace (Llama 3.1)' },
+      'hf': { endpoint: '/api/huggingface', name: '🤗 HuggingFace (Llama 3.1)' },
+      'gemini': { endpoint: '/api/gemini', name: '✨ Gemini 2.0 Flash' },
       'cohere': { endpoint: '/api/deepseek', name: '🔮 Cohere (Command R)' },
       'kimi': { endpoint: '/api/kimi', name: '🌙 Kimi (Moonshot)' }
     };
@@ -825,7 +857,8 @@
               <span class="model-selector-label">Model 2:</span>
               <select class="model-selector" id="model-2">
                 <option value="groq">⚡ Groq (Llama 3.3)</option>
-                <option value="hf" selected>🤗 HuggingFace (Llama 3.1)</option>
+                <option value="hf">🤗 HuggingFace (Llama 3.1)</option>
+                <option value="gemini" selected>✨ Gemini 2.0 Flash</option>
                 <option value="cohere">🔮 Cohere (Command R)</option>
                 <option value="kimi">🌙 Kimi (Moonshot)</option>
               </select>

@@ -16,9 +16,9 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
-    if (!HUGGINGFACE_API_KEY) {
-      return res.status(500).json({ error: "HUGGINGFACE_API_KEY is not set." });
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY is not set." });
     }
 
     const { prompt, mode } = req.body;
@@ -29,34 +29,40 @@ module.exports = async (req, res) => {
     // Get context based on mode
     const contextMessage = getRelevantContext(prompt, mode || 'academic');
 
+    // Combine context and prompt for Gemini
+    const fullPrompt = `${contextMessage}\n\nUser question: ${prompt}`;
+
     const response = await fetch(
-      "https://router.huggingface.co/v1/chat/completions",
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "meta-llama/Llama-3.1-8B-Instruct",
-          messages: [
-            { role: "system", content: contextMessage },
-            { role: "user", content: prompt }
-          ],
-          max_tokens: 512,
-          temperature: 0.7,
+          contents: [{
+            parts: [{
+              text: fullPrompt
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+            topP: 0.95,
+            topK: 40
+          }
         }),
       }
     );
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Hugging Face error:", err);
+      console.error("Gemini API error:", err);
       return res.status(response.status).json({ error: err });
     }
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content?.trim() || "(No response)";
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "(No response)";
 
     res.json({ text });
   } catch (err) {

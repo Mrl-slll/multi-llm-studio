@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UW-Madison Student Guidebook</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --uw-red: #C5050C;
+            --uw-blue: #0479A8;
+            --uw-dark: #282728;
+            --uw-light-gray: #f5f5f5;
+            --panel-width: 320px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--uw-red) 0%, #a00409 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mode-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .panel-toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 1.5rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Response Grid */
+        .response-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex: 1;
+        }
+
+        .response-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .response-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--uw-red), var(--uw-blue));
+        }
+
+        .model-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--uw-light-gray);
+        }
+
+        .model-icon {
+            font-size: 1.5rem;
+        }
+
+        .model-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--uw-dark);
+        }
+
+        .response-content {
+            flex: 1;
+            overflow-y: auto;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .response-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .response-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .response-content::-webkit-scrollbar-thumb {
+            background: var(--uw-red);
+            border-radius: 10px;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-style: italic;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .error {
+            color: var(--uw-red);
+            font-weight: 500;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 -4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #questionInput {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 60px;
+            transition: border-color 0.3s ease;
+        }
+
+        #questionInput:focus {
+            outline: none;
+            border-color: var(--uw-blue);
+        }
+
+        #sendBtn {
+            background: linear-gradient(135deg, var(--uw-red) 0%, #a00409 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(197, 5, 12, 0.4);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -var(--panel-width);
+            width: var(--panel-width);
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.15);
+            transition: right 0.3s ease;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, var(--uw-red) 0%, #a00409 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .close-panel-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .close-panel-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .panel-tabs {
+            display: flex;
+            background: var(--uw-light-gray);
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--uw-red);
+            border-bottom-color: var(--uw-red);
+            background: white;
+        }
+
+        .tab-btn:hover {
+            background: rgba(197, 5, 12, 0.05);
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* History Tab */
+        .history-list {
+            list-style: none;
+        }
+
+        .history-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--uw-light-gray);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid var(--uw-blue);
+        }
+
+        .history-item:hover {
+            background: #e8e8e8;
+            transform: translateX(5px);
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #999;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        /* Notepad Tab */
+        #notepadText {
+            width: 100%;
+            min-height: 400px;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
+        #notepadText:focus {
+            outline: none;
+            border-color: var(--uw-blue);
+        }
+
+        /* Saved Tab */
+        .saved-list {
+            list-style: none;
+        }
+
+        .saved-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--uw-light-gray);
+            border-radius: 8px;
+            border-left: 4px solid var(--uw-red);
+        }
+
+        .saved-question {
+            font-weight: 700;
+            color: var(--uw-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .saved-answer {
+            font-size: 0.9rem;
+            color: #555;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .saved-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .panel-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn {
+            background: var(--uw-blue);
+            color: white;
+        }
+
+        .export-btn:hover {
+            background: #036288;
+        }
+
+        .clear-btn {
+            background: var(--uw-red);
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #a00409;
+        }
+
+        .panel-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Markdown Styling */
+        .response-content h1, .response-content h2, .response-content h3 {
+            color: var(--uw-red);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .response-content p {
+            margin-bottom: 0.75rem;
+        }
+
+        .response-content ul, .response-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .response-content code {
+            background: var(--uw-light-gray);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .response-content pre {
+            background: var(--uw-dark);
+            color: white;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 0.75rem;
+        }
+
+        .response-content pre code {
+            background: transparent;
+            padding: 0;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .response-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .mode-badge {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            #sendBtn {
+                width: 100%;
+            }
+
+            .side-panel {
+                width: 90vw;
+                right: -90vw;
+            }
+
+            .tab-btn {
+                font-size: 0.85rem;
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <div class="mode-badge" id="modeBadge">Loading...</div>
+            <h1>UW-Madison Student Guidebook</h1>
+        </div>
+        <button class="panel-toggle-btn" id="panelToggleBtn" title="Open Panel">⚙️</button>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Response Grid -->
+        <div class="response-grid">
+            <!-- Groq -->
+            <div class="response-card">
+                <div class="model-header">
+                    <span class="model-icon">🚀</span>
+                    <span class="model-name">Groq</span>
+                </div>
+                <div class="response-content" id="groqResponse">
+                    <div class="loading">Waiting for question</div>
+                </div>
+            </div>
+
+            <!-- HuggingFace -->
+            <div class="response-card">
+                <div class="model-header">
+                    <span class="model-icon">🤗</span>
+                    <span class="model-name">HuggingFace</span>
+                </div>
+                <div class="response-content" id="hfResponse">
+                    <div class="loading">Waiting for question</div>
+                </div>
+            </div>
+
+            <!-- Cohere -->
+            <div class="response-card">
+                <div class="model-header">
+                    <span class="model-icon">💎</span>
+                    <span class="model-name">Cohere</span>
+                </div>
+                <div class="response-content" id="cohereResponse">
+                    <div class="loading">Waiting for question</div>
+                </div>
+            </div>
+
+            <!-- Kimi -->
+            <div class="response-card">
+                <div class="model-header">
+                    <span class="model-icon">🌙</span>
+                    <span class="model-name">Kimi</span>
+                </div>
+                <div class="response-content" id="kimiResponse">
+                    <div class="loading">Waiting for question</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <textarea 
+                id="questionInput" 
+                placeholder="Ask a question about UW-Madison academics or student life..."
+                rows="1"
+            ></textarea>
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="side-panel" id="sidePanel">
+        <div class="panel-header">
+            <span class="panel-title">Panel</span>
+            <button class="close-panel-btn" id="closePanelBtn">×</button>
+        </div>
+
+        <div class="panel-tabs">
+            <button class="tab-btn active" data-tab="history">History</button>
+            <button class="tab-btn" data-tab="notepad">Notepad</button>
+            <button class="tab-btn" data-tab="saved">Saved</button>
+        </div>
+
+        <div class="panel-content">
+            <!-- History Tab -->
+            <div class="tab-panel active" id="historyTab">
+                <ul class="history-list" id="historyList">
+                    <li class="history-empty">No questions asked yet</li>
+                </ul>
+            </div>
+
+            <!-- Notepad Tab -->
+            <div class="tab-panel" id="notepadTab">
+                <textarea 
+                    id="notepadText" 
+                    placeholder="Take notes here... (auto-saved)"
+                ></textarea>
+            </div>
+
+            <!-- Saved Tab -->
+            <div class="tab-panel" id="savedTab">
+                <ul class="saved-list" id="savedList">
+                    <li class="history-empty">No saved recordings yet</li>
+                </ul>
+                <div class="saved-controls">
+                    <button class="panel-btn export-btn" id="exportBtn" disabled>Export JSON</button>
+                    <button class="panel-btn clear-btn" id="clearBtn" disabled>Clear All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let currentMode = 'academic';
+        let historyItems = [];
+        let savedRecordings = [];
+
+        // DOM Elements
+        const modeBadge = document.getElementById('modeBadge');
+        const questionInput = document.getElementById('questionInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const groqResponse = document.getElementById('groqResponse');
+        const hfResponse = document.getElementById('hfResponse');
+        const cohereResponse = document.getElementById('cohereResponse');
+        const kimiResponse = document.getElementById('kimiResponse');
+        const sidePanel = document.getElementById('sidePanel');
+        const panelToggleBtn = document.getElementById('panelToggleBtn');
+        const closePanelBtn = document.getElementById('closePanelBtn');
+        const historyList = document.getElementById('historyList');
+        const notepadText = document.getElementById('notepadText');
+        const savedList = document.getElementById('savedList');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Initialize
+        function init() {
+            // Extract mode from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentMode = urlParams.get('mode') || 'academic';
+            
+            // Update mode badge
+            updateModeBadge();
+            
+            // Load saved data
+            loadNotepad();
+            loadHistory();
+            loadSavedRecordings();
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        function updateModeBadge() {
+            if (currentMode === 'academic') {
+                modeBadge.textContent = '📚 Academic Mode';
+            } else if (currentMode === 'studentlife') {
+                modeBadge.textContent = '🏫 Student Life Mode';
+            } else {
+                modeBadge.textContent = '📖 General Mode';
+            }
+        }
+
+        function setupEventListeners() {
+            // Send button
+            sendBtn.addEventListener('click', handleSend);
+            
+            // Enter key in textarea
+            questionInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            // Panel toggle
+            panelToggleBtn.addEventListener('click', () => {
+                sidePanel.classList.add('open');
+            });
+
+            closePanelBtn.addEventListener('click', () => {
+                sidePanel.classList.remove('open');
+            });
+
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+
+            // Notepad auto-save
+            notepadText.addEventListener('input', () => {
+                localStorage.setItem('notepad', notepadText.value);
+            });
+
+            // Export and Clear buttons
+            exportBtn.addEventListener('click', exportSavedRecordings);
+            clearBtn.addEventListener('click', clearSavedRecordings);
+        }
+
+        function switchTab(tabName) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        async function handleSend() {
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            // Disable input
+            sendBtn.disabled = true;
+            questionInput.disabled = true;
+
+            // Add to history
+            addToHistory(question);
+
+            // Clear previous responses and show loading
+            groqResponse.innerHTML = '<div class="loading">Loading</div>';
+            hfResponse.innerHTML = '<div class="loading">Loading</div>';
+            cohereResponse.innerHTML = '<div class="loading">Loading</div>';
+            kimiResponse.innerHTML = '<div class="loading">Loading</div>';
+
+            // Prepare responses object for saving
+            const responses = {
+                question: question,
+                answers: {}
+            };
+
+            // Query all APIs in parallel
+            try {
+                await Promise.all([
+                    queryAPI('/api/openai', question, groqResponse, 'Groq', responses),
+                    queryAPI('/api/gemini', question, hfResponse, 'HuggingFace', responses),
+                    queryAPI('/api/deepseek', question, cohereResponse, 'Cohere', responses),
+                    queryAPI('/api/kimi', question, kimiResponse, 'Kimi', responses)
+                ]);
+
+                // Save the recording
+                saveRecording(responses);
+            } catch (error) {
+                console.error('Error querying APIs:', error);
+            }
+
+            // Re-enable input
+            sendBtn.disabled = false;
+            questionInput.disabled = false;
+            questionInput.value = '';
+            questionInput.focus();
+        }
+
+        async function queryAPI(endpoint, prompt, responseElement, modelName, responsesObj) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        mode: currentMode
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const answer = data.response || data.text || 'No response received';
+                
+                // Render markdown
+                responseElement.innerHTML = marked.parse(answer);
+                
+                // Store in responses object
+                responsesObj.answers[modelName] = answer;
+            } catch (error) {
+                console.error(`Error querying ${modelName}:`, error);
+                responseElement.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                responsesObj.answers[modelName] = `Error: ${error.message}`;
+            }
+        }
+
+        function addToHistory(question) {
+            historyItems.unshift(question);
+            
+            // Keep only last 50 items
+            if (historyItems.length > 50) {
+                historyItems = historyItems.slice(0, 50);
+            }
+
+            saveHistory();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (historyItems.length === 0) {
+                historyList.innerHTML = '<li class="history-empty">No questions asked yet</li>';
+                return;
+            }
+
+            historyList.innerHTML = historyItems.map((item, index) => `
+                <li class="history-item" onclick="useHistoryItem('${escapeHtml(item)}')">
+                    ${escapeHtml(item)}
+                </li>
+            `).join('');
+        }
+
+        function useHistoryItem(question) {
+            questionInput.value = question;
+            sidePanel.classList.remove('open');
+            questionInput.focus();
+        }
+
+        function saveHistory() {
+            localStorage.setItem('history', JSON.stringify(historyItems));
+        }
+
+        function loadHistory() {
+            const saved = localStorage.getItem('history');
+            if (saved) {
+                historyItems = JSON.parse(saved);
+                renderHistory();
+            }
+        }
+
+        function loadNotepad() {
+            const saved = localStorage.getItem('notepad');
+            if (saved) {
+                notepadText.value = saved;
+            }
+        }
+
+        function saveRecording(recording) {
+            recording.timestamp = new Date().toISOString();
+            savedRecordings.unshift(recording);
+
+            // Keep only last 20 recordings
+            if (savedRecordings.length > 20) {
+                savedRecordings = savedRecordings.slice(0, 20);
+            }
+
+            saveSavedRecordings();
+            renderSavedRecordings();
+        }
+
+        function renderSavedRecordings() {
+            if (savedRecordings.length === 0) {
+                savedList.innerHTML = '<li class="history-empty">No saved recordings yet</li>';
+                exportBtn.disabled = true;
+                clearBtn.disabled = true;
+                return;
+            }
+
+            exportBtn.disabled = false;
+            clearBtn.disabled = false;
+
+            savedList.innerHTML = savedRecordings.map((rec, index) => {
+                const date = new Date(rec.timestamp).toLocaleString();
+                const preview = Object.values(rec.answers)[0] || 'No response';
+                const previewText = preview.substring(0, 150) + (preview.length > 150 ? '...' : '');
+                
+                return `
+                    <li class="saved-item">
+                        <div class="saved-question">${escapeHtml(rec.question)}</div>
+                        <div class="saved-answer">${escapeHtml(previewText)}</div>
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 0.5rem;">${date}</div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function saveSavedRecordings() {
+            localStorage.setItem('savedRecordings', JSON.stringify(savedRecordings));
+        }
+
+        function loadSavedRecordings() {
+            const saved = localStorage.getItem('savedRecordings');
+            if (saved) {
+                savedRecordings = JSON.parse(saved);
+                renderSavedRecordings();
+            }
+        }
+
+        function exportSavedRecordings() {
+            if (savedRecordings.length === 0) {
+                alert('No recordings to export');
+                return;
+            }
+
+            const dataStr = JSON.stringify(savedRecordings, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `uw-guidebook-recordings-${Date.now()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearSavedRecordings() {
+            if (!confirm('Are you sure you want to clear all saved recordings? This cannot be undone.')) {
+                return;
+            }
+
+            savedRecordings = [];
+            saveSavedRecordings();
+            renderSavedRecordings();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
