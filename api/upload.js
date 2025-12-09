@@ -35,18 +35,31 @@ module.exports = async (req, res) => {
     const form = formidable({
       maxFileSize: 50 * 1024 * 1024, // 50MB limit
       keepExtensions: true,
+      uploadDir: '/tmp',
+      filename: (name, ext, part) => {
+        return `${Date.now()}-${part.originalFilename}`;
+      }
     });
 
     const [fields, files] = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
+        if (err) {
+          console.error('Formidable parse error:', err);
+          reject(err);
+        }
+        console.log('Parsed files:', JSON.stringify(files, null, 2));
         resolve([fields, files]);
       });
     });
 
-    const file = files.file?.[0] || files.file;
+    // Handle both formidable v2 and v3 formats
+    let file = files.file;
+    if (Array.isArray(file)) {
+      file = file[0];
+    }
     
     if (!file) {
+      console.log('No file found in upload. Files object:', files);
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
@@ -54,7 +67,13 @@ module.exports = async (req, res) => {
     const fileName = file.originalFilename || file.name || 'unknown';
     const fileExt = path.extname(fileName).toLowerCase();
     
-    console.log('Upload debug:', { filePath, fileName, fileExt, fileExists: fs.existsSync(filePath) });
+    console.log('Upload debug:', { 
+      filePath, 
+      fileName, 
+      fileExt, 
+      fileSize: file.size,
+      fileExists: fs.existsSync(filePath) 
+    });
 
     let extractedText = '';
     
@@ -116,29 +135,37 @@ module.exports = async (req, res) => {
       
       // Plain text files (.txt, .md, .rtf)
       else if (['.txt', '.md', '.rtf'].includes(fileExt)) {
-        extractedText = fs.readFileSync(filePath, 'utf-8');
+        try {
+          extractedText = fs.readFileSync(filePath, 'utf-8');
+        } catch (err) {
+          throw new Error(`Failed to read text file: ${err.message}`);
+        }
       }
       
       // Code files
       else if (['.py', '.js', '.java', '.cpp', '.c', '.h', '.r', '.html', '.css', '.ipynb'].includes(fileExt)) {
-        extractedText = fs.readFileSync(filePath, 'utf-8');
-        // For Jupyter notebooks, extract only text content
-        if (fileExt === '.ipynb') {
-          try {
-            const notebook = JSON.parse(extractedText);
-            let notebookText = '';
-            notebook.cells?.forEach((cell, idx) => {
-              notebookText += `\n\n=== Cell ${idx + 1} (${cell.cell_type}) ===\n`;
-              if (Array.isArray(cell.source)) {
-                notebookText += cell.source.join('');
-              } else {
-                notebookText += cell.source;
-              }
-            });
-            extractedText = notebookText;
-          } catch (e) {
-            // If JSON parsing fails, keep raw text
+        try {
+          extractedText = fs.readFileSync(filePath, 'utf-8');
+          // For Jupyter notebooks, extract only text content
+          if (fileExt === '.ipynb') {
+            try {
+              const notebook = JSON.parse(extractedText);
+              let notebookText = '';
+              notebook.cells?.forEach((cell, idx) => {
+                notebookText += `\n\n=== Cell ${idx + 1} (${cell.cell_type}) ===\n`;
+                if (Array.isArray(cell.source)) {
+                  notebookText += cell.source.join('');
+                } else {
+                  notebookText += cell.source;
+                }
+              });
+              extractedText = notebookText;
+            } catch (e) {
+              // If JSON parsing fails, keep raw text
+            }
           }
+        } catch (err) {
+          throw new Error(`Failed to read code file: ${err.message}`);
         }
       }
       
@@ -159,7 +186,9 @@ module.exports = async (req, res) => {
       }
       
       else {
-        fs.unlinkSync(filePath);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
         return res.status(400).json({ 
           error: `Unsupported file type: ${fileExt}`,
           message: 'Supported types: PDF, Word (.docx/.doc), Excel (.xlsx/.xls), CSV, Text (.txt/.md/.rtf), Code files (.py/.js/.java/.cpp/.c/.r/.html/.css/.ipynb), and PowerPoint (.pptx/.ppt)'
@@ -167,7 +196,11 @@ module.exports = async (req, res) => {
       }
 
       // Cleanup uploaded file
-      fs.unlinkSync(filePath);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      
+      console.log('Successfully extracted text, length:', extractedText.length);
 
       // Return extracted text
       return res.status(200).json({
