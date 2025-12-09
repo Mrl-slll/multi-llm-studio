@@ -818,9 +818,9 @@
           <div class="upload-icon">📎</div>
           <div class="upload-text">
             <strong>Drop files here</strong> or <label for="fileInput" class="upload-link">click to upload</label>
-            <div class="upload-hint">Supports PDF, TXT, MD (Max 10MB)</div>
+            <div class="upload-hint">Supports PDF, Word, Excel, PowerPoint, CSV, Text, Code files (Max 50MB)</div>
           </div>
-          <input type="file" id="fileInput" accept=".pdf,.txt,.md" style="display: none;">
+          <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.csv,.txt,.md,.rtf,.odt,.ods,.odp,.py,.js,.java,.cpp,.c,.h,.r,.html,.css,.ipynb,.jpg,.jpeg,.png,.gif" style="display: none;">
         </div>
         <div class="uploaded-files" id="uploadedFiles"></div>
       </div>
@@ -1681,17 +1681,17 @@
     
     async function handleFileUpload(file) {
       // Validate file type
-      const validTypes = ['.pdf', '.txt', '.md'];
+      const validTypes = ['.pdf', '.docx', '.doc', '.xlsx', '.xls', '.pptx', '.ppt', '.csv', '.txt', '.md', '.rtf', '.odt', '.ods', '.odp', '.py', '.js', '.java', '.cpp', '.c', '.h', '.r', '.html', '.css', '.ipynb', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.tif'];
       const fileExt = '.' + file.name.split('.').pop().toLowerCase();
       
       if (!validTypes.includes(fileExt)) {
-        alert('Please upload PDF, TXT, or MD files only.');
+        alert('Unsupported file type. Please upload documents, spreadsheets, presentations, code files, or images.');
         return;
       }
       
-      // Validate file size (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB.');
+      // Validate file size (50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        alert('File size must be less than 50MB.');
         return;
       }
       
@@ -1728,7 +1728,14 @@
     
     function displayUploadedFile(fileName, fileSize) {
       const sizeKB = (fileSize / 1024).toFixed(1);
-      const icon = fileName.endsWith('.pdf') ? '📄' : '📝';
+      const ext = fileName.split('.').pop().toLowerCase();
+      let icon = '📄';
+      if (['docx', 'doc', 'odt'].includes(ext)) icon = '📝';
+      else if (['xlsx', 'xls', 'csv', 'ods'].includes(ext)) icon = '📊';
+      else if (['pptx', 'ppt', 'odp'].includes(ext)) icon = '📽️';
+      else if (['py', 'js', 'java', 'cpp', 'c', 'r', 'html', 'css', 'ipynb'].includes(ext)) icon = '💻';
+      else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'tif'].includes(ext)) icon = '🖼️';
+      else if (['txt', 'md', 'rtf'].includes(ext)) icon = '📝';
       
       uploadedFilesContainer.innerHTML = `
         <div class="file-item">
