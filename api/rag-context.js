@@ -20,7 +20,9 @@ function getRelevantContext(query, mode) {
     context += "**For charts, graphs, distributions, or visualizations:**\n";
     context += "- Include chart data in a ```chart code block with JSON format\n";
     context += "- Example: ```chart\\n{\"type\":\"bar\",\"data\":{\"labels\":[\"0\",\"1\",\"2\"],\"datasets\":[{\"label\":\"Frequency\",\"data\":[10,20,15],\"backgroundColor\":\"rgba(197,5,12,0.6)\"}]}}\\n```\n";
-    context += "- Supported types: bar (histograms), line (distributions), scatter, pie\n";
+    context += "- Auto-generated chart types: binomial/dbinom/histogram, normal distribution, t-distribution, boxplot, scatter plot, bar chart, line plot, Q-Q plot, confidence intervals, regression\n";
+    context += "- Simply mention the chart type in your response (e.g., 'Here's a binomial distribution...', 'This scatter plot shows...') and it will be auto-generated\n";
+    context += "- Supported types: bar, line, scatter, pie\n";
     context += "- Always provide text explanation along with the chart\n";
     context += "- Use cardinal red color rgba(197,5,12,0.6) for UW-Madison theme\n\n";
     

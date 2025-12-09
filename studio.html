@@ -1239,6 +1239,292 @@
               }
             };
           }
+          
+          // Detect t-distribution requests
+          else if (lowerPrompt.includes('t distribution') || lowerPrompt.includes('t-distribution') || lowerPrompt.includes('student')) {
+            const dfMatch = lowerPrompt.match(/df\s*=?\s*(\d+)|degrees?\s+of\s+freedom\s*=?\s*(\d+)/);
+            const df = dfMatch ? parseInt(dfMatch[1] || dfMatch[2]) : 5;
+            
+            // Generate t-distribution curve
+            const labels = [];
+            const values = [];
+            for (let x = -4; x <= 4; x += 0.1) {
+              labels.push(x.toFixed(1));
+              // Simplified t-distribution approximation
+              const factor = Math.sqrt(df / (df + x * x));
+              const y = factor / Math.sqrt(df * Math.PI);
+              values.push(y);
+            }
+            
+            chartData = {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: `t-Distribution (df=${df})`,
+                  data: values,
+                  borderColor: 'rgba(197, 5, 12, 1)',
+                  backgroundColor: 'rgba(197, 5, 12, 0.1)',
+                  fill: true,
+                  tension: 0.4,
+                  pointRadius: 0
+                }]
+              },
+              options: {
+                scales: {
+                  y: { beginAtZero: true, title: { display: true, text: 'Density' }},
+                  x: { title: { display: true, text: 't' }, ticks: { maxTicksLimit: 10 }}
+                }
+              }
+            };
+          }
+          
+          // Detect boxplot requests
+          else if (lowerPrompt.includes('boxplot') || lowerPrompt.includes('box plot')) {
+            // Extract data if provided, otherwise use example
+            const dataMatch = lowerPrompt.match(/\[([^\]]+)\]/) || lowerPrompt.match(/data\s*[:=]\s*([0-9,\s]+)/);
+            let data = [12, 15, 18, 20, 22, 25, 28, 30, 35, 40];
+            
+            if (dataMatch) {
+              data = dataMatch[1].split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
+            }
+            
+            data.sort((a, b) => a - b);
+            const q1 = data[Math.floor(data.length * 0.25)];
+            const median = data[Math.floor(data.length * 0.5)];
+            const q3 = data[Math.floor(data.length * 0.75)];
+            const min = data[0];
+            const max = data[data.length - 1];
+            
+            chartData = {
+              type: 'bar',
+              data: {
+                labels: ['Distribution'],
+                datasets: [{
+                  label: 'Min',
+                  data: [min],
+                  backgroundColor: 'rgba(197, 5, 12, 0.3)'
+                }, {
+                  label: 'Q1',
+                  data: [q1],
+                  backgroundColor: 'rgba(197, 5, 12, 0.5)'
+                }, {
+                  label: 'Median',
+                  data: [median],
+                  backgroundColor: 'rgba(197, 5, 12, 0.8)'
+                }, {
+                  label: 'Q3',
+                  data: [q3],
+                  backgroundColor: 'rgba(197, 5, 12, 0.5)'
+                }, {
+                  label: 'Max',
+                  data: [max],
+                  backgroundColor: 'rgba(197, 5, 12, 0.3)'
+                }]
+              },
+              options: {
+                indexAxis: 'y',
+                scales: {
+                  x: { stacked: false, title: { display: true, text: 'Value' }}
+                }
+              }
+            };
+          }
+          
+          // Detect scatter plot requests
+          else if (lowerPrompt.includes('scatter') || lowerPrompt.includes('scatterplot')) {
+            // Generate sample scatter data
+            const points = [];
+            for (let i = 0; i < 30; i++) {
+              const x = Math.random() * 100;
+              const y = 2 * x + 10 + (Math.random() - 0.5) * 40;
+              points.push({ x: x.toFixed(1), y: y.toFixed(1) });
+            }
+            
+            chartData = {
+              type: 'scatter',
+              data: {
+                datasets: [{
+                  label: 'Data Points',
+                  data: points,
+                  backgroundColor: 'rgba(197, 5, 12, 0.6)',
+                  borderColor: 'rgba(197, 5, 12, 1)',
+                  pointRadius: 5
+                }]
+              },
+              options: {
+                scales: {
+                  x: { title: { display: true, text: 'X Variable' }},
+                  y: { title: { display: true, text: 'Y Variable' }}
+                }
+              }
+            };
+          }
+          
+          // Detect bar chart requests
+          else if (lowerPrompt.includes('bar chart') || lowerPrompt.includes('bar graph')) {
+            const categories = ['Category A', 'Category B', 'Category C', 'Category D'];
+            const values = [45, 62, 38, 55];
+            
+            chartData = {
+              type: 'bar',
+              data: {
+                labels: categories,
+                datasets: [{
+                  label: 'Frequency',
+                  data: values,
+                  backgroundColor: 'rgba(197, 5, 12, 0.6)',
+                  borderColor: 'rgba(197, 5, 12, 1)',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                scales: {
+                  y: { beginAtZero: true, title: { display: true, text: 'Count' }},
+                  x: { title: { display: true, text: 'Categories' }}
+                }
+              }
+            };
+          }
+          
+          // Detect line plot / time series requests
+          else if (lowerPrompt.includes('line plot') || lowerPrompt.includes('time series') || lowerPrompt.includes('trend')) {
+            const labels = [];
+            const values = [];
+            for (let i = 0; i <= 20; i++) {
+              labels.push(`T${i}`);
+              values.push(50 + 2 * i + (Math.random() - 0.5) * 10);
+            }
+            
+            chartData = {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: 'Trend Over Time',
+                  data: values,
+                  borderColor: 'rgba(197, 5, 12, 1)',
+                  backgroundColor: 'rgba(197, 5, 12, 0.1)',
+                  fill: true,
+                  tension: 0.3,
+                  pointRadius: 3
+                }]
+              },
+              options: {
+                scales: {
+                  y: { title: { display: true, text: 'Value' }},
+                  x: { title: { display: true, text: 'Time' }}
+                }
+              }
+            };
+          }
+          
+          // Detect Q-Q plot requests
+          else if (lowerPrompt.includes('qq') || lowerPrompt.includes('q-q') || lowerPrompt.includes('quantile')) {
+            const points = [];
+            for (let i = 1; i <= 20; i++) {
+              const theoretical = -2 + (i / 20) * 4;
+              const sample = theoretical + (Math.random() - 0.5) * 0.5;
+              points.push({ x: theoretical.toFixed(2), y: sample.toFixed(2) });
+            }
+            
+            chartData = {
+              type: 'scatter',
+              data: {
+                datasets: [{
+                  label: 'Q-Q Plot',
+                  data: points,
+                  backgroundColor: 'rgba(197, 5, 12, 0.6)',
+                  pointRadius: 4
+                }, {
+                  type: 'line',
+                  label: 'Reference Line',
+                  data: [{ x: -2, y: -2 }, { x: 2, y: 2 }],
+                  borderColor: 'rgba(0, 0, 0, 0.5)',
+                  borderDash: [5, 5],
+                  pointRadius: 0,
+                  fill: false
+                }]
+              },
+              options: {
+                scales: {
+                  x: { title: { display: true, text: 'Theoretical Quantiles' }},
+                  y: { title: { display: true, text: 'Sample Quantiles' }}
+                }
+              }
+            };
+          }
+          
+          // Detect confidence interval requests
+          else if (lowerPrompt.includes('confidence interval') || lowerPrompt.includes('ci') || lowerPrompt.includes('error bar')) {
+            const groups = ['Group 1', 'Group 2', 'Group 3', 'Group 4'];
+            const means = [25, 32, 28, 35];
+            const errors = [3, 4, 2.5, 3.5];
+            
+            chartData = {
+              type: 'bar',
+              data: {
+                labels: groups,
+                datasets: [{
+                  label: 'Mean with 95% CI',
+                  data: means,
+                  backgroundColor: 'rgba(197, 5, 12, 0.6)',
+                  borderColor: 'rgba(197, 5, 12, 1)',
+                  borderWidth: 1,
+                  errorBars: errors
+                }]
+              },
+              options: {
+                scales: {
+                  y: { beginAtZero: true, title: { display: true, text: 'Value' }},
+                  x: { title: { display: true, text: 'Groups' }}
+                }
+              }
+            };
+          }
+          
+          // Detect regression / fitted line requests
+          else if (lowerPrompt.includes('regression') || lowerPrompt.includes('fitted line') || lowerPrompt.includes('linear model')) {
+            const scatterPoints = [];
+            const linePoints = [];
+            
+            for (let i = 0; i < 30; i++) {
+              const x = i * 3;
+              const y = 10 + 2 * x + (Math.random() - 0.5) * 15;
+              scatterPoints.push({ x: x, y: y.toFixed(1) });
+            }
+            
+            for (let x = 0; x <= 90; x += 10) {
+              linePoints.push({ x: x, y: 10 + 2 * x });
+            }
+            
+            chartData = {
+              type: 'scatter',
+              data: {
+                datasets: [{
+                  type: 'scatter',
+                  label: 'Observed Data',
+                  data: scatterPoints,
+                  backgroundColor: 'rgba(197, 5, 12, 0.5)',
+                  pointRadius: 4
+                }, {
+                  type: 'line',
+                  label: 'Regression Line',
+                  data: linePoints,
+                  borderColor: 'rgba(0, 100, 200, 1)',
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  fill: false
+                }]
+              },
+              options: {
+                scales: {
+                  x: { title: { display: true, text: 'X' }},
+                  y: { title: { display: true, text: 'Y' }}
+                }
+              }
+            };
+          }
         }
         
         // Render markdown
