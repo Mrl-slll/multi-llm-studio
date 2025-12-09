@@ -1,10 +1,42 @@
 const formidable = require('formidable');
-const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+
+// Lazy-load pdf-parse so we can polyfill DOMMatrix in serverless before requiring it
+let pdfParse = null;
+
+async function getPdfParse() {
+  if (pdfParse) return pdfParse;
+
+  // Minimal DOM/polyfill so pdf-parse doesn't crash in environments without canvas
+  if (typeof global.DOMMatrix === 'undefined') {
+    try {
+      const canvas = require('@napi-rs/canvas');
+      global.DOMMatrix = canvas.DOMMatrix;
+      global.ImageData = canvas.ImageData;
+      global.Path2D = canvas.Path;
+    } catch (e) {
+      // Fallback no-op polyfills; enough to satisfy pdf-parse checks
+      global.DOMMatrix = class DOMMatrix {
+        constructor() {
+          this.a = 1; this.b = 0; this.c = 0; this.d = 1; this.e = 0; this.f = 0;
+        }
+        multiplySelf() { return this; }
+        translateSelf() { return this; }
+        scaleSelf() { return this; }
+        rotateSelf() { return this; }
+      };
+      global.ImageData = global.ImageData || class ImageData {};
+      global.Path2D = global.Path2D || class Path2D {};
+    }
+  }
+
+  pdfParse = require('pdf-parse');
+  return pdfParse;
+}
 
 // Disable default body parser for file uploads (CommonJS export for Vercel)
 module.exports.config = {
@@ -110,7 +142,8 @@ module.exports = async (req, res) => {
       if (fileExt === '.pdf') {
         try {
           const dataBuffer = fs.readFileSync(uploadedFilePath);
-          const pdfData = await pdfParse(dataBuffer);
+          const pdfModule = await getPdfParse();
+          const pdfData = await pdfModule(dataBuffer);
           extractedText = pdfData.text;
         } catch (err) {
           throw new Error(`Failed to read PDF: ${err.message}`);
