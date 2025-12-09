@@ -15,14 +15,12 @@ export const config = {
 };
 
 module.exports = async (req, res) => {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  // CORS headers - must be set before any response
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  res.setHeader('Content-Type', 'application/json');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -30,13 +28,18 @@ module.exports = async (req, res) => {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ success: false, error: 'Method not allowed' });
+    return;
   }
 
   let uploadedFilePath = null;
 
   try {
+    console.log('=== Upload request started ===');
+    console.log('Headers:', req.headers);
+    
     const tmpDir = os.tmpdir();
+    console.log('Using temp directory:', tmpDir);
     
     const form = formidable({
       maxFileSize: 50 * 1024 * 1024, // 50MB limit
@@ -51,10 +54,11 @@ module.exports = async (req, res) => {
       form.parse(req, (err, fields, files) => {
         if (err) {
           console.error('Formidable parse error:', err);
-          reject(err);
+          reject(new Error('File parsing failed: ' + err.message));
           return;
         }
-        console.log('Parse successful, files:', Object.keys(files));
+        console.log('Parse successful');
+        console.log('Files received:', Object.keys(files));
         resolve({ fields, files });
       });
     });
@@ -68,18 +72,21 @@ module.exports = async (req, res) => {
     }
     
     if (!file) {
-      console.log('No file found. Files object keys:', Object.keys(files));
-      return res.status(400).json({ 
+      console.error('No file found. Files object keys:', Object.keys(files));
+      res.status(400).json({ 
+        success: false,
         error: 'No file uploaded',
+        details: 'No file was received by the server',
         received: Object.keys(files)
       });
+      return;
     }
 
     uploadedFilePath = file.filepath || file.path;
     const fileName = file.originalFilename || file.name || 'unknown';
     const fileExt = path.extname(fileName).toLowerCase();
     
-    console.log('File received:', { 
+    console.log('File info:', { 
       uploadedFilePath, 
       fileName, 
       fileExt, 

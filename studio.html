@@ -1702,25 +1702,46 @@
         const formData = new FormData();
         formData.append('file', file);
         
+        console.log('Uploading file:', file.name, 'Size:', file.size);
+        
         const response = await fetch('/api/upload', {
           method: 'POST',
-          body: formData
+          body: formData,
+          // Don't set Content-Type header - let browser set it with boundary
         });
         
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
+        console.log('Response status:', response.status, response.statusText);
+        
+        let data;
+        try {
+          const responseText = await response.text();
+          console.log('Response text:', responseText.substring(0, 200));
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          throw new Error('Server returned invalid response. Check if file type is supported.');
         }
         
-        const data = await response.json();
+        if (!response.ok) {
+          const errorMsg = data.details || data.error || data.message || response.statusText;
+          throw new Error(errorMsg);
+        }
+        
+        if (!data.success || !data.text) {
+          throw new Error('Server did not return extracted text');
+        }
         
         uploadedFileText = data.text;
         uploadedFileName = data.fileName;
+        
+        console.log('Upload successful, extracted', data.text.length, 'characters');
         
         // Display uploaded file
         displayUploadedFile(data.fileName, data.fileSize);
         
       } catch (error) {
         console.error('Upload error:', error);
+        console.error('Error stack:', error.stack);
         uploadedFilesContainer.innerHTML = '';
         alert('Failed to upload file: ' + error.message);
       }
