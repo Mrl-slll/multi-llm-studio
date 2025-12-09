@@ -4,11 +4,13 @@ const mammoth = require('mammoth');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // Disable default body parser for file uploads
 export const config = {
   api: {
     bodyParser: false,
+    responseLimit: false,
   },
 };
 
@@ -31,27 +33,34 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  let uploadedFilePath = null;
+
   try {
+    const tmpDir = os.tmpdir();
+    
     const form = formidable({
       maxFileSize: 50 * 1024 * 1024, // 50MB limit
       keepExtensions: true,
-      uploadDir: '/tmp',
-      filename: (name, ext, part) => {
-        return `${Date.now()}-${part.originalFilename}`;
-      }
+      uploadDir: tmpDir,
+      multiples: false,
     });
 
-    const [fields, files] = await new Promise((resolve, reject) => {
+    console.log('Starting file parse...');
+    
+    const parseResult = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) {
           console.error('Formidable parse error:', err);
           reject(err);
+          return;
         }
-        console.log('Parsed files:', JSON.stringify(files, null, 2));
-        resolve([fields, files]);
+        console.log('Parse successful, files:', Object.keys(files));
+        resolve({ fields, files });
       });
     });
 
+    const { files } = parseResult;
+    
     // Handle both formidable v2 and v3 formats
     let file = files.file;
     if (Array.isArray(file)) {
@@ -59,26 +68,29 @@ module.exports = async (req, res) => {
     }
     
     if (!file) {
-      console.log('No file found in upload. Files object:', files);
-      return res.status(400).json({ error: 'No file uploaded' });
+      console.log('No file found. Files object keys:', Object.keys(files));
+      return res.status(400).json({ 
+        error: 'No file uploaded',
+        received: Object.keys(files)
+      });
     }
 
-    const filePath = file.filepath || file.path;
+    uploadedFilePath = file.filepath || file.path;
     const fileName = file.originalFilename || file.name || 'unknown';
     const fileExt = path.extname(fileName).toLowerCase();
     
-    console.log('Upload debug:', { 
-      filePath, 
+    console.log('File received:', { 
+      uploadedFilePath, 
       fileName, 
       fileExt, 
       fileSize: file.size,
-      fileExists: fs.existsSync(filePath) 
+      exists: fs.existsSync(uploadedFilePath)
     });
 
     let extractedText = '';
     
     // Check if file exists
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(uploadedFilePath)) {
       return res.status(400).json({ 
         error: 'File not found after upload',
         details: 'The uploaded file could not be accessed. Please try again.'
@@ -89,7 +101,7 @@ module.exports = async (req, res) => {
       // PDF files
       if (fileExt === '.pdf') {
         try {
-          const dataBuffer = fs.readFileSync(filePath);
+          const dataBuffer = fs.readFileSync(uploadedFilePath);
           const pdfData = await pdfParse(dataBuffer);
           extractedText = pdfData.text;
         } catch (err) {
@@ -100,7 +112,7 @@ module.exports = async (req, res) => {
       // Word documents (.docx, .doc)
       else if (fileExt === '.docx' || fileExt === '.doc') {
         try {
-          const dataBuffer = fs.readFileSync(filePath);
+          const dataBuffer = fs.readFileSync(uploadedFilePath);
           const result = await mammoth.extractRawText({ buffer: dataBuffer });
           extractedText = result.value;
         } catch (err) {
@@ -111,7 +123,7 @@ module.exports = async (req, res) => {
       // Excel spreadsheets (.xlsx, .xls)
       else if (fileExt === '.xlsx' || fileExt === '.xls') {
         try {
-          const workbook = xlsx.readFile(filePath);
+          const workbook = xlsx.readFile(uploadedFilePath);
           let allText = '';
           workbook.SheetNames.forEach(sheetName => {
             const sheet = workbook.Sheets[sheetName];
@@ -127,7 +139,7 @@ module.exports = async (req, res) => {
       // CSV files
       else if (fileExt === '.csv') {
         try {
-          extractedText = fs.readFileSync(filePath, 'utf-8');
+          extractedText = fs.readFileSync(uploadedFilePath, 'utf-8');
         } catch (err) {
           throw new Error(`Failed to read CSV file: ${err.message}`);
         }
@@ -136,7 +148,7 @@ module.exports = async (req, res) => {
       // Plain text files (.txt, .md, .rtf)
       else if (['.txt', '.md', '.rtf'].includes(fileExt)) {
         try {
-          extractedText = fs.readFileSync(filePath, 'utf-8');
+          extractedText = fs.readFileSync(uploadedFilePath, 'utf-8');
         } catch (err) {
           throw new Error(`Failed to read text file: ${err.message}`);
         }
@@ -145,7 +157,7 @@ module.exports = async (req, res) => {
       // Code files
       else if (['.py', '.js', '.java', '.cpp', '.c', '.h', '.r', '.html', '.css', '.ipynb'].includes(fileExt)) {
         try {
-          extractedText = fs.readFileSync(filePath, 'utf-8');
+          extractedText = fs.readFileSync(uploadedFilePath, 'utf-8');
           // For Jupyter notebooks, extract only text content
           if (fileExt === '.ipynb') {
             try {
@@ -186,8 +198,8 @@ module.exports = async (req, res) => {
       }
       
       else {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
+        if (fs.existsSync(uploadedFilePath)) {
+          fs.unlinkSync(uploadedFilePath);
         }
         return res.status(400).json({ 
           error: `Unsupported file type: ${fileExt}`,
@@ -196,8 +208,8 @@ module.exports = async (req, res) => {
       }
 
       // Cleanup uploaded file
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      if (fs.existsSync(uploadedFilePath)) {
+        fs.unlinkSync(uploadedFilePath);
       }
       
       console.log('Successfully extracted text, length:', extractedText.length);
@@ -213,8 +225,8 @@ module.exports = async (req, res) => {
 
     } catch (extractError) {
       // Cleanup on error
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+        fs.unlinkSync(uploadedFilePath);
       }
       throw extractError;
     }
@@ -222,6 +234,16 @@ module.exports = async (req, res) => {
   } catch (error) {
     console.error('Upload error:', error);
     console.error('Error stack:', error.stack);
+    
+    // Cleanup on outer error
+    if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+      try {
+        fs.unlinkSync(uploadedFilePath);
+      } catch (cleanupError) {
+        console.error('Cleanup error:', cleanupError);
+      }
+    }
+    
     return res.status(500).json({ 
       error: 'Failed to process file', 
       details: error.message,

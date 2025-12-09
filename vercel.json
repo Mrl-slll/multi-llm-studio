@@ -5,5 +5,11 @@
       "source": "/studio",
       "destination": "/studio.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/upload.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
 }
