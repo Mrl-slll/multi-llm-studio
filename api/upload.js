@@ -6,8 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Disable default body parser for file uploads
-export const config = {
+// Disable default body parser for file uploads (CommonJS export for Vercel)
+module.exports.config = {
   api: {
     bodyParser: false,
     responseLimit: false,
@@ -99,6 +99,7 @@ module.exports = async (req, res) => {
     // Check if file exists
     if (!fs.existsSync(uploadedFilePath)) {
       return res.status(400).json({ 
+        success: false,
         error: 'File not found after upload',
         details: 'The uploaded file could not be accessed. Please try again.'
       });
@@ -209,6 +210,7 @@ module.exports = async (req, res) => {
           fs.unlinkSync(uploadedFilePath);
         }
         return res.status(400).json({ 
+          success: false,
           error: `Unsupported file type: ${fileExt}`,
           message: 'Supported types: PDF, Word (.docx/.doc), Excel (.xlsx/.xls), CSV, Text (.txt/.md/.rtf), Code files (.py/.js/.java/.cpp/.c/.r/.html/.css/.ipynb), and PowerPoint (.pptx/.ppt)'
         });
@@ -252,6 +254,7 @@ module.exports = async (req, res) => {
     }
     
     return res.status(500).json({ 
+      success: false,
       error: 'Failed to process file', 
       details: error.message,
       type: error.name
