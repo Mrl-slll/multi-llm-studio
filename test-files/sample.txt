@@ -1,0 +1,14 @@
+This is a test file for the Multi-LLM Studio upload feature.
+
+Sample Data:
+- Item 1: Test value A
+- Item 2: Test value B
+- Item 3: Test value C
+
+This file tests plain text upload and extraction.
+The AI models should be able to read this content and answer questions about it.
+
+Mathematical example: The quadratic formula is x = (-b ± √(b²-4ac)) / 2a
+
+Question: What items are listed in this file?
+Expected answer: The file lists three items with test values A, B, and C.

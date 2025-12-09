@@ -50,42 +50,68 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const filePath = file.filepath;
-    const fileName = file.originalFilename || 'unknown';
+    const filePath = file.filepath || file.path;
+    const fileName = file.originalFilename || file.name || 'unknown';
     const fileExt = path.extname(fileName).toLowerCase();
+    
+    console.log('Upload debug:', { filePath, fileName, fileExt, fileExists: fs.existsSync(filePath) });
 
     let extractedText = '';
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(400).json({ 
+        error: 'File not found after upload',
+        details: 'The uploaded file could not be accessed. Please try again.'
+      });
+    }
 
     try {
       // PDF files
       if (fileExt === '.pdf') {
-        const dataBuffer = fs.readFileSync(filePath);
-        const pdfData = await pdfParse(dataBuffer);
-        extractedText = pdfData.text;
+        try {
+          const dataBuffer = fs.readFileSync(filePath);
+          const pdfData = await pdfParse(dataBuffer);
+          extractedText = pdfData.text;
+        } catch (err) {
+          throw new Error(`Failed to read PDF: ${err.message}`);
+        }
       }
       
       // Word documents (.docx, .doc)
       else if (fileExt === '.docx' || fileExt === '.doc') {
-        const dataBuffer = fs.readFileSync(filePath);
-        const result = await mammoth.extractRawText({ buffer: dataBuffer });
-        extractedText = result.value;
+        try {
+          const dataBuffer = fs.readFileSync(filePath);
+          const result = await mammoth.extractRawText({ buffer: dataBuffer });
+          extractedText = result.value;
+        } catch (err) {
+          throw new Error(`Failed to read Word document: ${err.message}`);
+        }
       }
       
       // Excel spreadsheets (.xlsx, .xls)
       else if (fileExt === '.xlsx' || fileExt === '.xls') {
-        const workbook = xlsx.readFile(filePath);
-        let allText = '';
-        workbook.SheetNames.forEach(sheetName => {
-          const sheet = workbook.Sheets[sheetName];
-          const sheetText = xlsx.utils.sheet_to_csv(sheet);
-          allText += `\n\n=== Sheet: ${sheetName} ===\n${sheetText}`;
-        });
-        extractedText = allText;
+        try {
+          const workbook = xlsx.readFile(filePath);
+          let allText = '';
+          workbook.SheetNames.forEach(sheetName => {
+            const sheet = workbook.Sheets[sheetName];
+            const sheetText = xlsx.utils.sheet_to_csv(sheet);
+            allText += `\n\n=== Sheet: ${sheetName} ===\n${sheetText}`;
+          });
+          extractedText = allText;
+        } catch (err) {
+          throw new Error(`Failed to read Excel file: ${err.message}`);
+        }
       }
       
       // CSV files
       else if (fileExt === '.csv') {
-        extractedText = fs.readFileSync(filePath, 'utf-8');
+        try {
+          extractedText = fs.readFileSync(filePath, 'utf-8');
+        } catch (err) {
+          throw new Error(`Failed to read CSV file: ${err.message}`);
+        }
       }
       
       // Plain text files (.txt, .md, .rtf)
@@ -162,9 +188,11 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error('Upload error:', error);
+    console.error('Error stack:', error.stack);
     return res.status(500).json({ 
       error: 'Failed to process file', 
-      details: error.message 
+      details: error.message,
+      type: error.name
     });
   }
 };
