@@ -1,4 +1,5 @@
-const formidable = require('formidable');
+const formidableLib = require('formidable');
+const formidable = formidableLib.default || formidableLib;
 const mammoth = require('mammoth');
 const xlsx = require('xlsx');
 const fs = require('fs');
