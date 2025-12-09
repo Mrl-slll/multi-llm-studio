@@ -1130,6 +1130,110 @@
           }
         }
         
+        // Auto-generate charts for common statistical requests
+        if (!chartData && mode === 'academic') {
+          const lowerPrompt = prompt.toLowerCase();
+          
+          // Detect binomial distribution requests
+          if (lowerPrompt.includes('binomial') || lowerPrompt.includes('dbinom')) {
+            const nMatch = lowerPrompt.match(/n\s*=?\s*(\d+)/);
+            const pMatch = lowerPrompt.match(/p\s*=?\s*(0?\.\d+|0\.\d+|1)/);
+            
+            if (nMatch && pMatch) {
+              const n = parseInt(nMatch[1]);
+              const p = parseFloat(pMatch[1]);
+              
+              // Calculate binomial probabilities
+              const labels = [];
+              const probs = [];
+              for (let k = 0; k <= n; k++) {
+                labels.push(k.toString());
+                // Binomial probability formula: C(n,k) * p^k * (1-p)^(n-k)
+                const binomCoeff = factorial(n) / (factorial(k) * factorial(n - k));
+                const prob = binomCoeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
+                probs.push(prob);
+              }
+              
+              chartData = {
+                type: 'bar',
+                data: {
+                  labels: labels,
+                  datasets: [{
+                    label: `Binomial Distribution (n=${n}, p=${p})`,
+                    data: probs,
+                    backgroundColor: 'rgba(197, 5, 12, 0.6)',
+                    borderColor: 'rgba(197, 5, 12, 1)',
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  scales: {
+                    y: { 
+                      beginAtZero: true,
+                      title: { display: true, text: 'Probability' }
+                    },
+                    x: { 
+                      title: { display: true, text: 'Number of Successes (k)' }
+                    }
+                  }
+                }
+              };
+            }
+          }
+          
+          // Detect normal distribution requests
+          else if (lowerPrompt.includes('normal distribution') || lowerPrompt.includes('bell curve') || lowerPrompt.includes('gaussian')) {
+            const meanMatch = lowerPrompt.match(/mean\s*=?\s*(-?\d+\.?\d*)|μ\s*=?\s*(-?\d+\.?\d*)/);
+            const sdMatch = lowerPrompt.match(/sd\s*=?\s*(\d+\.?\d*)|σ\s*=?\s*(\d+\.?\d*)|standard deviation\s*=?\s*(\d+\.?\d*)/);
+            
+            const mean = meanMatch ? parseFloat(meanMatch[1] || meanMatch[2] || 0) : 0;
+            const sd = sdMatch ? parseFloat(sdMatch[1] || sdMatch[2] || sdMatch[3] || 1) : 1;
+            
+            // Generate normal distribution curve
+            const labels = [];
+            const values = [];
+            const start = mean - 4 * sd;
+            const end = mean + 4 * sd;
+            const step = (end - start) / 100;
+            
+            for (let x = start; x <= end; x += step) {
+              labels.push(x.toFixed(2));
+              // Normal distribution PDF
+              const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(sd, 2));
+              const y = (1 / (sd * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+              values.push(y);
+            }
+            
+            chartData = {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: `Normal Distribution (μ=${mean}, σ=${sd})`,
+                  data: values,
+                  borderColor: 'rgba(197, 5, 12, 1)',
+                  backgroundColor: 'rgba(197, 5, 12, 0.1)',
+                  fill: true,
+                  tension: 0.4,
+                  pointRadius: 0
+                }]
+              },
+              options: {
+                scales: {
+                  y: { 
+                    beginAtZero: true,
+                    title: { display: true, text: 'Probability Density' }
+                  },
+                  x: { 
+                    title: { display: true, text: 'x' },
+                    ticks: { maxTicksLimit: 10 }
+                  }
+                }
+              }
+            };
+          }
+        }
+        
         // Render markdown
         responseEl.innerHTML = marked.parse(textContent);
         
@@ -1214,6 +1318,16 @@
         sendBtn.click();
       }
     });
+
+    // Helper function for factorial calculation
+    function factorial(n) {
+      if (n === 0 || n === 1) return 1;
+      let result = 1;
+      for (let i = 2; i <= n; i++) {
+        result *= i;
+      }
+      return result;
+    }
 
     // File Upload Handling
     let uploadedFileText = null;
