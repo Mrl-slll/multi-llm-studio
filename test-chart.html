@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chart Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <h1>Chart Test</h1>
+  <div id="container" style="width: 500px; height: 400px; margin: 20px;">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <script>
+    // Test binomial distribution
+    function factorial(n) {
+      if (n === 0 || n === 1) return 1;
+      let result = 1;
+      for (let i = 2; i <= n; i++) {
+        result *= i;
+      }
+      return result;
+    }
+
+    const n = 10;
+    const p = 0.5;
+    
+    const labels = [];
+    const probs = [];
+    for (let k = 0; k <= n; k++) {
+      labels.push(k.toString());
+      const binomCoeff = factorial(n) / (factorial(k) * factorial(n - k));
+      const prob = binomCoeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
+      probs.push(prob);
+      console.log(`k=${k}, prob=${prob}`);
+    }
+    
+    const ctx = document.getElementById('myChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `Binomial Distribution (n=${n}, p=${p})`,
+          data: probs,
+          backgroundColor: 'rgba(197, 5, 12, 0.6)',
+          borderColor: 'rgba(197, 5, 12, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { 
+            beginAtZero: true,
+            title: { display: true, text: 'Probability' }
+          },
+          x: { 
+            title: { display: true, text: 'Number of Successes (k)' }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

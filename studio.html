@@ -1136,53 +1136,56 @@
           console.log('Checking for chart generation, prompt:', lowerPrompt);
           
           // Detect binomial distribution requests
-          if (lowerPrompt.includes('binomial') || lowerPrompt.includes('dbinom')) {
+          if (lowerPrompt.includes('binomial') || lowerPrompt.includes('dbinom') || lowerPrompt.includes('histogram')) {
             console.log('Detected binomial request');
-            const nMatch = lowerPrompt.match(/n\s*=?\s*(\d+)/);
-            const pMatch = lowerPrompt.match(/p\s*=?\s*(0?\.\d+|0\.\d+|1)/);
+            const nMatch = lowerPrompt.match(/n\s*=?\s*(\d+)/) || lowerPrompt.match(/(\d+)\s+trials?/);
+            const pMatch = lowerPrompt.match(/p\s*=?\s*(0?\.\d+|1\.0|1|0)/) || lowerPrompt.match(/(0\.\d+)/);
             
             console.log('n match:', nMatch, 'p match:', pMatch);
             
-            if (nMatch && pMatch) {
-              const n = parseInt(nMatch[1]);
-              const p = parseFloat(pMatch[1]);
-              
-              // Calculate binomial probabilities
-              const labels = [];
-              const probs = [];
-              for (let k = 0; k <= n; k++) {
-                labels.push(k.toString());
-                // Binomial probability formula: C(n,k) * p^k * (1-p)^(n-k)
-                const binomCoeff = factorial(n) / (factorial(k) * factorial(n - k));
-                const prob = binomCoeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
-                probs.push(prob);
-              }
-              
-              chartData = {
-                type: 'bar',
-                data: {
-                  labels: labels,
-                  datasets: [{
-                    label: `Binomial Distribution (n=${n}, p=${p})`,
-                    data: probs,
-                    backgroundColor: 'rgba(197, 5, 12, 0.6)',
-                    borderColor: 'rgba(197, 5, 12, 1)',
-                    borderWidth: 1
-                  }]
-                },
-                options: {
-                  scales: {
-                    y: { 
-                      beginAtZero: true,
-                      title: { display: true, text: 'Probability' }
-                    },
-                    x: { 
-                      title: { display: true, text: 'Number of Successes (k)' }
-                    }
+            // Use defaults if not specified
+            const n = nMatch ? parseInt(nMatch[1]) : 10;
+            const p = pMatch ? parseFloat(pMatch[1]) : 0.5;
+            
+            console.log('Using n =', n, 'p =', p);
+            
+            // Calculate binomial probabilities
+            const labels = [];
+            const probs = [];
+            for (let k = 0; k <= n; k++) {
+              labels.push(k.toString());
+              // Binomial probability formula: C(n,k) * p^k * (1-p)^(n-k)
+              const binomCoeff = factorial(n) / (factorial(k) * factorial(n - k));
+              const prob = binomCoeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
+              probs.push(prob);
+            }
+            
+            console.log('Generated binomial data:', { labels, probs });
+            
+            chartData = {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: `Binomial Distribution (n=${n}, p=${p})`,
+                  data: probs,
+                  backgroundColor: 'rgba(197, 5, 12, 0.6)',
+                  borderColor: 'rgba(197, 5, 12, 1)',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                scales: {
+                  y: { 
+                    beginAtZero: true,
+                    title: { display: true, text: 'Probability' }
+                  },
+                  x: { 
+                    title: { display: true, text: 'Number of Successes (k)' }
                   }
                 }
-              };
-            }
+              }
+            };
           }
           
           // Detect normal distribution requests
