@@ -1133,11 +1133,15 @@
         // Auto-generate charts for common statistical requests
         if (!chartData && mode === 'academic') {
           const lowerPrompt = prompt.toLowerCase();
+          console.log('Checking for chart generation, prompt:', lowerPrompt);
           
           // Detect binomial distribution requests
           if (lowerPrompt.includes('binomial') || lowerPrompt.includes('dbinom')) {
+            console.log('Detected binomial request');
             const nMatch = lowerPrompt.match(/n\s*=?\s*(\d+)/);
             const pMatch = lowerPrompt.match(/p\s*=?\s*(0?\.\d+|0\.\d+|1)/);
+            
+            console.log('n match:', nMatch, 'p match:', pMatch);
             
             if (nMatch && pMatch) {
               const n = parseInt(nMatch[1]);
@@ -1239,15 +1243,30 @@
         
         // Render chart if data exists
         if (chartData) {
+          console.log('Rendering chart with data:', chartData);
+          
           const chartContainer = document.createElement('div');
           chartContainer.className = 'chart-container';
           chartContainer.style.marginTop = '20px';
+          chartContainer.style.padding = '20px';
+          chartContainer.style.backgroundColor = '#f9f9f9';
+          chartContainer.style.borderRadius = '8px';
           
           const canvas = document.createElement('canvas');
+          canvas.style.maxHeight = '400px';
           chartContainer.appendChild(canvas);
           responseEl.appendChild(chartContainer);
           
-          renderChart(canvas, chartData);
+          // Create chart directly
+          const ctx = canvas.getContext('2d');
+          new Chart(ctx, {
+            type: chartData.type || 'bar',
+            data: chartData.data,
+            options: chartData.options || {
+              responsive: true,
+              maintainAspectRatio: true
+            }
+          });
         }
         
         // Render math with KaTeX
