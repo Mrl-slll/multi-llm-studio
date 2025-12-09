@@ -1114,8 +1114,37 @@
         const data = await response.json();
         const text = data.text || 'No response received.';
         
+        // Check if response contains chart data
+        let chartData = null;
+        let textContent = text;
+        
+        // Look for JSON chart data in markdown code blocks
+        const chartMatch = text.match(/```chart\s*\n([\s\S]*?)\n```/);
+        if (chartMatch) {
+          try {
+            chartData = JSON.parse(chartMatch[1]);
+            // Remove chart block from text to display
+            textContent = text.replace(/```chart\s*\n[\s\S]*?\n```/, '');
+          } catch (e) {
+            console.error('Failed to parse chart data:', e);
+          }
+        }
+        
         // Render markdown
-        responseEl.innerHTML = marked.parse(text);
+        responseEl.innerHTML = marked.parse(textContent);
+        
+        // Render chart if data exists
+        if (chartData) {
+          const chartContainer = document.createElement('div');
+          chartContainer.className = 'chart-container';
+          chartContainer.style.marginTop = '20px';
+          
+          const canvas = document.createElement('canvas');
+          chartContainer.appendChild(canvas);
+          responseEl.appendChild(chartContainer);
+          
+          renderChart(canvas, chartData);
+        }
         
         // Render math with KaTeX
         renderMathInElement(responseEl, {

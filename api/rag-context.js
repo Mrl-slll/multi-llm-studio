@@ -17,6 +17,12 @@ function getRelevantContext(query, mode) {
     context += "- Use LaTeX math notation wrapped in $ for inline math (e.g., $x^2 + 5$)\n";
     context += "- Use $$ for display math/block equations (e.g., $$\\int_a^b x^2 dx$$)\n";
     context += "- Always format statistical formulas, calculus notation, and economic equations in LaTeX\n\n";
+    context += "**For charts, graphs, distributions, or visualizations:**\n";
+    context += "- Include chart data in a ```chart code block with JSON format\n";
+    context += "- Example: ```chart\\n{\"type\":\"bar\",\"data\":{\"labels\":[\"0\",\"1\",\"2\"],\"datasets\":[{\"label\":\"Frequency\",\"data\":[10,20,15],\"backgroundColor\":\"rgba(197,5,12,0.6)\"}]}}\\n```\n";
+    context += "- Supported types: bar (histograms), line (distributions), scatter, pie\n";
+    context += "- Always provide text explanation along with the chart\n";
+    context += "- Use cardinal red color rgba(197,5,12,0.6) for UW-Madison theme\n\n";
     
     // Check if query mentions specific course - use exact course code matching
     const courses = academicsKB.courses;
