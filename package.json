@@ -15,8 +15,10 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "formidable": "^3.5.4",
     "marked": "^17.0.1",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
     "vercel": "^48.11.0"

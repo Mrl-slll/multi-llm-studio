@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -401,6 +403,140 @@
       cursor: not-allowed;
     }
 
+    /* File Upload Styles */
+    .file-upload-section {
+      margin-bottom: 16px;
+    }
+
+    .upload-zone {
+      border: 2px dashed rgba(197, 5, 12, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(197, 5, 12, 0.02);
+    }
+
+    .upload-zone:hover {
+      border-color: #C5050C;
+      background: rgba(197, 5, 12, 0.05);
+    }
+
+    .upload-zone.drag-over {
+      border-color: #C5050C;
+      background: rgba(197, 5, 12, 0.1);
+      transform: scale(1.02);
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .upload-text strong {
+      color: #C5050C;
+      font-weight: 600;
+    }
+
+    .upload-link {
+      color: #C5050C;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .upload-link:hover {
+      color: #9B0000;
+    }
+
+    .upload-hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .uploaded-files {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: white;
+      border: 1px solid rgba(197, 5, 12, 0.2);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .file-icon {
+      font-size: 20px;
+    }
+
+    .file-name {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .file-size {
+      color: #999;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .file-remove {
+      background: none;
+      border: none;
+      color: #C5050C;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .file-remove:hover {
+      background: rgba(197, 5, 12, 0.1);
+    }
+
+    /* Chart Container Styles */
+    .chart-container {
+      margin: 16px 0;
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid rgba(197, 5, 12, 0.2);
+      max-width: 100%;
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #C5050C;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .chart-canvas {
+      max-height: 400px;
+    }
+
     /* Side Panel */
     .side-panel {
       position: fixed;
@@ -675,6 +811,20 @@
           </select>
         </div>
       </div>
+      
+      <!-- File Upload Zone -->
+      <div class="file-upload-section" id="fileUploadSection">
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">📎</div>
+          <div class="upload-text">
+            <strong>Drop files here</strong> or <label for="fileInput" class="upload-link">click to upload</label>
+            <div class="upload-hint">Supports PDF, TXT, MD (Max 10MB)</div>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf,.txt,.md" style="display: none;">
+        </div>
+        <div class="uploaded-files" id="uploadedFiles"></div>
+      </div>
+      
       <div class="input-row">
         <textarea id="prompt" placeholder="Ask anything about UW-Madison courses or campus life..."></textarea>
         <button id="sendBtn">Send</button>
@@ -946,11 +1096,17 @@
       statusEl.className = 'provider-status loading';
       responseEl.innerHTML = '<div class="response-placeholder">Generating response...</div>';
       
+      // Augment prompt with uploaded file text if available
+      let finalPrompt = prompt;
+      if (uploadedFileText && uploadedFileName) {
+        finalPrompt = `I have uploaded a document titled "${uploadedFileName}" with the following content:\n\n---BEGIN DOCUMENT---\n${uploadedFileText}\n---END DOCUMENT---\n\n${prompt}`;
+      }
+      
       try {
         const response = await fetch(provider.endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, mode })
+          body: JSON.stringify({ prompt: finalPrompt, mode })
         });
         
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -1029,6 +1185,160 @@
         sendBtn.click();
       }
     });
+
+    // File Upload Handling
+    let uploadedFileText = null;
+    let uploadedFileName = null;
+    
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadedFilesContainer = document.getElementById('uploadedFiles');
+    
+    // Click to upload
+    uploadZone.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'LABEL') {
+        fileInput.click();
+      }
+    });
+    
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('drag-over');
+    });
+    
+    uploadZone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        await handleFileUpload(files[0]);
+      }
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', async (e) => {
+      if (e.target.files.length > 0) {
+        await handleFileUpload(e.target.files[0]);
+      }
+    });
+    
+    async function handleFileUpload(file) {
+      // Validate file type
+      const validTypes = ['.pdf', '.txt', '.md'];
+      const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!validTypes.includes(fileExt)) {
+        alert('Please upload PDF, TXT, or MD files only.');
+        return;
+      }
+      
+      // Validate file size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB.');
+        return;
+      }
+      
+      // Show uploading status
+      uploadedFilesContainer.innerHTML = '<div style="text-align: center; padding: 12px; color: #C5050C;">Uploading...</div>';
+      
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        uploadedFileText = data.text;
+        uploadedFileName = data.fileName;
+        
+        // Display uploaded file
+        displayUploadedFile(data.fileName, data.fileSize);
+        
+      } catch (error) {
+        console.error('Upload error:', error);
+        uploadedFilesContainer.innerHTML = '';
+        alert('Failed to upload file: ' + error.message);
+      }
+    }
+    
+    function displayUploadedFile(fileName, fileSize) {
+      const sizeKB = (fileSize / 1024).toFixed(1);
+      const icon = fileName.endsWith('.pdf') ? '📄' : '📝';
+      
+      uploadedFilesContainer.innerHTML = `
+        <div class="file-item">
+          <div class="file-info">
+            <span class="file-icon">${icon}</span>
+            <span class="file-name">${fileName}</span>
+            <span class="file-size">${sizeKB} KB</span>
+          </div>
+          <button class="file-remove" onclick="removeUploadedFile()">✕</button>
+        </div>
+      `;
+    }
+    
+    function removeUploadedFile() {
+      uploadedFileText = null;
+      uploadedFileName = null;
+      uploadedFilesContainer.innerHTML = '';
+      fileInput.value = '';
+    }
+    
+    // Make removeUploadedFile global
+    window.removeUploadedFile = removeUploadedFile;
+
+    // Chart Rendering Function
+    function renderChart(container, chartData) {
+      const chartContainer = document.createElement('div');
+      chartContainer.className = 'chart-container';
+      
+      const title = document.createElement('div');
+      title.className = 'chart-title';
+      title.textContent = chartData.title || 'Chart';
+      
+      const canvas = document.createElement('canvas');
+      canvas.className = 'chart-canvas';
+      
+      chartContainer.appendChild(title);
+      chartContainer.appendChild(canvas);
+      container.appendChild(chartContainer);
+      
+      const ctx = canvas.getContext('2d');
+      
+      new Chart(ctx, {
+        type: chartData.type || 'line',
+        data: chartData.data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                color: '#333',
+                font: { size: 12, weight: 500 }
+              }
+            }
+          },
+          scales: chartData.scales || {}
+        }
+      });
+    }
+
   </script>
 </body>
 </html>
